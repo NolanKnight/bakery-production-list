@@ -2,7 +2,7 @@ import { Separator } from "./ui/separator";
 
 export default function Header({ title }: { title: String }) {
   return (
-    <div className="flex flex-col m-6 h-full justify-center items-center">
+    <div className="flex flex-col m-6 h-full justify-center items-center print:hidden">
       <h1 className="text-center text-6xl font-heading mb-4">
         Buttercup Bakery
       </h1>
