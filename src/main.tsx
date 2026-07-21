@@ -16,6 +16,8 @@ import Layout from "./components/layout";
 import UserRole from "@/../shared/userRole";
 import ItemCatalogPage from "./pages/itemCatalog";
 import PageNotFoundPage from "./pages/404";
+import WholesaleOrdersPage from "./pages/wholesaleOrders";
+import WholesaleOrderPage from "./pages/wholesaleOrder";
 
 const convex = new ConvexReactClient(
   import.meta.env.VITE_CONVEX_URL as string,
@@ -33,6 +35,8 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/" element={<Navigate to="/production" replace />} />
             <Route path="/par" element={<ParPage />} />
             <Route path="/wholesale-form" element={<WholesaleOrderForm />} />
+            <Route path="/wholesale-orders" element={<WholesaleOrdersPage />} />
+            <Route path="/wholesale-order/:id" element={<WholesaleOrderPage />} />
             <Route path="/production" element={<DailyProductionPage />} />
             <Route path="/production/print" element={<ProductionPrintPage />} />
             <Route path="/item-catalog" element={<ItemCatalogPage />} />

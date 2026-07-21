@@ -33,3 +33,12 @@ export const getWholesaleOrders = query({
     return await ctx.db.query("wholesaleOrders").collect();
   },
 });
+
+export const getWholesaleOrder = query({
+  args: {
+    orderId: v.id("wholesaleOrders"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.orderId);
+  },
+});
