@@ -11,7 +11,7 @@ export default function NavBar({ userRole }: { userRole: UserRole }) {
   }
 
   return (
-    <div className="w-full bg-inherit p-4 sticky top-0 flex justify-center">
+    <div className="w-full bg-inherit z-10 p-4 sticky top-0 flex justify-center print:hidden">
       <div className="w-fit p-2 border border-black">
         <div className="flex gap-4">
           {userRole.links.map((link) => {

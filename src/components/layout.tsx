@@ -12,7 +12,7 @@ export default function Layout({
   userRole: UserRole;
 }) {
   return (
-    <div className="w-full h-full min-h-screen bg-blue-200 flex flex-col items-center justify-center">
+    <div className="w-full h-full min-h-screen bg-blue-200 print:bg-white flex flex-col items-center justify-center">
       <Header title={`${userRole.name} Portal`} />
       <NavBar userRole={userRole} />
       {children ?? <h4 className="p-6 shimmer">Loading...</h4>}
