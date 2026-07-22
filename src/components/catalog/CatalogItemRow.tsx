@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 
 import { api } from "../../../convex/_generated/api";
@@ -43,22 +43,15 @@ export default function CatalogItemRow({ item }: Props) {
   const [open, setOpen] = useState(false);
 
   const [name, setName] = useState(item.name);
+  const [squareItemId, setSquareItemId] = useState(item.squareItemId ?? "");
 
   const [unitId, setUnitId] = useState<Id<"units">>(item.unitId);
-  const [unitMap, setUnitMap] = useState<Map<Id<"units">, string>>();
-
-  useEffect(() => {
-    if (unitMap || !units) return;
-
-    setUnitMap(() => {
-      const map = new Map<Id<"units">, string>();
-
-      for (const unit of units) {
-        map.set(unit._id, unit.name);
-      }
-
-      return map;
-    });
+  const unitMap = useMemo(() => {
+    const map = new Map<Id<"units">, string>();
+    for (const unit of units ?? []) {
+      map.set(unit._id, unit.name);
+    }
+    return map;
   }, [units]);
 
   const handleSave = async () => {
@@ -70,6 +63,7 @@ export default function CatalogItemRow({ item }: Props) {
       id: item._id,
       name: name.trim(),
       unitId: unitId,
+      squareItemId: squareItemId.trim(),
     }).catch(toastError);
 
     setEditing(false);
@@ -78,6 +72,7 @@ export default function CatalogItemRow({ item }: Props) {
   const handleCancel = () => {
     setName(item.name);
     setUnitId(item.unitId);
+    setSquareItemId(item.squareItemId ?? "");
     setEditing(false);
   };
 
@@ -95,7 +90,7 @@ export default function CatalogItemRow({ item }: Props) {
   return (
     <>
       <Separator />
-      <div className="grid grid-cols-[1fr_150px_auto_auto] items-center gap-4 py-2">
+      <div className="grid grid-cols-[1fr_150px_1fr_auto_auto] items-center gap-4 py-2">
         {/* Item Name */}
         {editing ? (
           <Input value={name} onChange={(e) => setName(e.target.value)} />
@@ -133,9 +128,27 @@ export default function CatalogItemRow({ item }: Props) {
           </span>
         )}
 
+        {/* Square Item ID */}
+        {editing ? (
+          <Input
+            value={squareItemId}
+            onChange={(e) => setSquareItemId(e.target.value)}
+            placeholder="Square item id"
+          />
+        ) : (
+          <span className="text-muted-foreground">
+            {item.squareItemId ?? "No Square item id"}
+          </span>
+        )}
+
         {/* Edit / Save */}
         {editing ? (
-          <Button size="sm" onClick={handleSave}>
+          <Button
+            size="sm"
+            onClick={() => {
+              void handleSave();
+            }}
+          >
             Save
           </Button>
         ) : (
@@ -170,7 +183,11 @@ export default function CatalogItemRow({ item }: Props) {
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
 
-                <AlertDialogAction onClick={handleDelete}>
+                <AlertDialogAction
+                  onClick={() => {
+                    void handleDelete();
+                  }}
+                >
                   Delete
                 </AlertDialogAction>
               </AlertDialogFooter>

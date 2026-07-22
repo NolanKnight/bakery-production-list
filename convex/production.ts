@@ -19,6 +19,10 @@ export const getDailyProduction = query({
       .query("wholesaleOrders")
       .withIndex("by_date", (q) => q.eq("desiredDate", args.date))
       .collect();
+    const retailOrders = await ctx.db
+      .query("retailOrders")
+      .withIndex("by_date", (q) => q.eq("desiredDate", args.date))
+      .collect();
 
     const overrides = await ctx.db
       .query("productionOverrides")
@@ -33,11 +37,18 @@ export const getDailyProduction = query({
 
     // ---- WHOLESALE SUM ----
     const wholesaleMap: Record<Id<"itemCatalog">, number> = {};
+    const retailMap: Record<Id<"itemCatalog">, number> = {};
 
     for (const order of orders) {
       for (const item of order.items) {
         wholesaleMap[item.itemId] =
           (wholesaleMap[item.itemId] ?? 0) + item.quantity;
+      }
+    }
+
+    for (const order of retailOrders) {
+      for (const item of order.items) {
+        retailMap[item.itemId] = (retailMap[item.itemId] ?? 0) + item.quantity;
       }
     }
 
@@ -47,7 +58,9 @@ export const getDailyProduction = query({
       items: entry.items.map((item) => {
         const par = normalizeWeekdayParValues(item.par)[weekday] ?? 0;
         const wholesale = wholesaleMap[item._id] ?? 0;
-        const needed = par + wholesale;
+        const retail = retailMap[item._id] ?? 0;
+
+        const needed = par + wholesale + retail;
         const inventory = item.currentInventory;
 
         const computed = needed - inventory;
@@ -60,6 +73,7 @@ export const getDailyProduction = query({
           par,
           wholesale,
           currentInventory: inventory,
+          retail,
           computedTotal: computed,
           finalTotal: override ?? computed,
         };

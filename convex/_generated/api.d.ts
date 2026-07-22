@@ -15,6 +15,7 @@ import type * as categories from "../categories.js";
 import type * as http from "../http.js";
 import type * as itemCatalog from "../itemCatalog.js";
 import type * as production from "../production.js";
+import type * as retailOrders from "../retailOrders.js";
 import type * as units from "../units.js";
 import type * as weekdayPar from "../weekdayPar.js";
 import type * as wholesaleOrders from "../wholesaleOrders.js";
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   itemCatalog: typeof itemCatalog;
   production: typeof production;
+  retailOrders: typeof retailOrders;
   units: typeof units;
   weekdayPar: typeof weekdayPar;
   wholesaleOrders: typeof wholesaleOrders;

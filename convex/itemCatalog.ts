@@ -96,13 +96,20 @@ export const updateItem = mutation({
     id: v.id("itemCatalog"),
     name: v.string(),
     unitId: v.id("units"),
+    squareItemId: v.optional(v.string()),
   },
 
   handler: async (ctx, args) => {
     await requireRole(ctx, ["admin"]);
+    const normalizedSquareItemId = args.squareItemId?.trim();
+
     await ctx.db.patch(args.id, {
       name: args.name,
       unitId: args.unitId,
+      squareItemId:
+        normalizedSquareItemId && normalizedSquareItemId.length > 0
+          ? normalizedSquareItemId
+          : undefined,
     });
   },
 });

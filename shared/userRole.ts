@@ -7,6 +7,7 @@ import {
   Link,
   Par,
   Production,
+  RetailOrders,
   WholesaleForm,
   WholesaleOrders,
 } from "./links";
@@ -27,6 +28,7 @@ export default class UserRole {
     Par,
     WholesaleForm,
     WholesaleOrders,
+    RetailOrders,
     Production,
     Inventory,
     ItemCatalog,

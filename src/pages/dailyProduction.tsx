@@ -163,6 +163,7 @@ export default function DailyProductionPage() {
                   <TableHead>Item</TableHead>
                   <TableHead className="text-center">Par</TableHead>
                   <TableHead className="text-center">Wholesale</TableHead>
+                  <TableHead className="text-center">Retail</TableHead>
                   <TableHead className="text-center">Inventory</TableHead>
                   <TableHead className="text-center">Computed</TableHead>
                   <TableHead className="text-center">Override</TableHead>
@@ -177,6 +178,7 @@ export default function DailyProductionPage() {
                     </TableCell>
                     <TableCell>{item.par}</TableCell>
                     <TableCell>{item.wholesale}</TableCell>
+                    <TableCell>{item.retail}</TableCell>
                     <TableCell>{item.currentInventory}</TableCell>
                     <TableCell>{item.computedTotal}</TableCell>
                     <TableCell>

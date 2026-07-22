@@ -11,6 +11,7 @@ export default defineSchema({
     active: v.boolean(),
     par: v.union(v.number(), weekdayParValidator),
     currentInventory: v.number(),
+    squareItemId: v.optional(v.string()),
   })
     .index("by_categoryId", ["categoryId"])
     .index("by_sortOrder", ["sortOrder"]),
@@ -46,6 +47,25 @@ export default defineSchema({
       }),
     ),
   }).index("by_date", ["desiredDate"]),
+  retailOrders: defineTable({
+    squareOrderId: v.string(),
+    desiredDate: v.string(),
+    createdAt: v.number(),
+    sourceName: v.optional(v.string()),
+    customer: v.object({
+      name: v.optional(v.string()),
+      email: v.optional(v.string()),
+      phone: v.optional(v.string()),
+    }),
+    items: v.array(
+      v.object({
+        itemId: v.id("itemCatalog"),
+        quantity: v.number(),
+      }),
+    ),
+  })
+    .index("by_date", ["desiredDate"])
+    .index("by_square_order_id", ["squareOrderId"]),
   accessInvitations: defineTable({
     email: v.string(),
     role: v.union(v.literal("admin"), v.literal("employee"), v.literal("client")),

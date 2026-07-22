@@ -18,6 +18,8 @@ import ItemCatalogPage from "./pages/itemCatalog";
 import PageNotFoundPage from "./pages/404";
 import WholesaleOrdersPage from "./pages/wholesaleOrders";
 import WholesaleOrderPage from "./pages/wholesaleOrder";
+import RetailOrdersPage from "./pages/retailOrders";
+import RetailOrderPage from "./pages/retailOrder";
 import LoginPage from "./pages/login";
 import SignupPage from "./pages/signup";
 import PendingAccessPage from "./pages/pendingAccess";
@@ -55,6 +57,16 @@ const authenticatedRoutes: {
   {
     path: "/wholesale-order/:id",
     element: <WholesaleOrderPage />,
+    allowedRoles: ["admin"] as const,
+  },
+  {
+    path: "/retail-orders",
+    element: <RetailOrdersPage />,
+    allowedRoles: ["admin"] as const,
+  },
+  {
+    path: "/retail-order/:id",
+    element: <RetailOrderPage />,
     allowedRoles: ["admin"] as const,
   },
   {
