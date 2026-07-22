@@ -44,4 +44,19 @@ export default defineSchema({
       }),
     ),
   }).index("by_date", ["desiredDate"]),
+  accessInvitations: defineTable({
+    email: v.string(),
+    role: v.union(v.literal("admin"), v.literal("employee"), v.literal("client")),
+    status: v.union(v.literal("pending"), v.literal("accepted"), v.literal("declined")),
+    source: v.union(v.literal("invite"), v.literal("request")),
+    note: v.optional(v.string()),
+    requestedByAuthUserId: v.optional(v.string()),
+    requestedByName: v.optional(v.string()),
+    resolvedByAuthUserId: v.optional(v.string()),
+    createdAt: v.number(),
+    resolvedAt: v.optional(v.number()),
+  })
+    .index("by_email_and_status", ["email", "status"])
+    .index("by_status_and_createdAt", ["status", "createdAt"])
+    .index("by_source_and_status", ["source", "status"]),
 });

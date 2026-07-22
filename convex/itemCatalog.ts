@@ -1,6 +1,7 @@
-import { Doc, Id } from "./_generated/dataModel";
+import { Doc } from "./_generated/dataModel";
 import { query, mutation, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
+import { requireRole } from "./authorization";
 
 export const getCatalog = async (ctx: QueryCtx) => {
   const categories = await ctx.db.query("categories").collect();
@@ -39,6 +40,7 @@ export const getCatalog = async (ctx: QueryCtx) => {
 export const getItems = query({
   args: {},
   handler: async (ctx) => {
+    await requireRole(ctx, ["admin", "employee", "client"]);
     return await getCatalog(ctx);
   },
 });
@@ -51,6 +53,7 @@ export const addItem = mutation({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin"]);
     const existing = await ctx.db.query("itemCatalog").collect();
 
     const sortOrder =
@@ -75,6 +78,7 @@ export const deleteItem = mutation({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin"]);
     await ctx.db.patch(args.id, {
       active: false,
     });
@@ -89,6 +93,7 @@ export const updateItem = mutation({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin"]);
     await ctx.db.patch(args.id, {
       name: args.name,
       unitId: args.unitId,
@@ -102,6 +107,7 @@ export const updateItemPar = mutation({
     par: v.number(),
   },
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin"]);
     await ctx.db.patch("itemCatalog", args.id, { par: args.par });
   },
 });
