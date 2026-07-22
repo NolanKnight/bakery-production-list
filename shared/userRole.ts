@@ -1,4 +1,5 @@
 import {
+  Account,
   AccessManagement,
   ItemCatalog,
   Link,
@@ -27,12 +28,15 @@ export default class UserRole {
     Production,
     ItemCatalog,
     AccessManagement,
+    Account,
   ]);
   public static readonly Employee: UserRole = new UserRole("employee", "Employee", [
     Production,
+    Account,
   ]);
   public static readonly Client: UserRole = new UserRole("client", "Client", [
     WholesaleForm,
+    Account,
   ]);
 
   private static readonly ByValue: Record<UserRoleValue, UserRole> = {

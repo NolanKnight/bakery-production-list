@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { SubmitEvent, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
@@ -17,6 +17,7 @@ import {
 import type { AssignableUserRole } from "@/../shared/userRole";
 import { toast } from "sonner";
 import { toastError } from "@/lib/errors";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const inviteRoles: AssignableUserRole[] = ["admin", "employee", "client"];
 
@@ -30,7 +31,7 @@ export default function AdminAccessPage() {
   const [note, setNote] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
-  const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
+  const handleCreate = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsCreating(true);
     await createInvitation({
@@ -77,18 +78,22 @@ export default function AdminAccessPage() {
             </Field>
             <Field>
               <FieldLabel htmlFor="invite-role">Role</FieldLabel>
-              <select
+              <Select
                 id="invite-role"
-                className="w-full h-9 rounded-md border px-3"
                 value={role}
-                onChange={(event) => setRole(event.target.value as AssignableUserRole)}
+                onValueChange={(event) => setRole(event as AssignableUserRole)}
               >
-                {inviteRoles.map((roleOption) => (
-                  <option key={roleOption} value={roleOption}>
-                    {roleOption}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {inviteRoles.map((roleOption) => (
+                    <SelectItem key={roleOption} value={roleOption}>
+                      {roleOption}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Field>
             <Field>
               <FieldLabel htmlFor="invite-note">Note</FieldLabel>

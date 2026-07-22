@@ -22,6 +22,7 @@ import LoginPage from "./pages/login";
 import SignupPage from "./pages/signup";
 import PendingAccessPage from "./pages/pendingAccess";
 import AdminAccessPage from "./pages/adminAccess";
+import AccountPage from "./pages/account";
 import { api } from "../convex/_generated/api";
 import type { UserRoleValue } from "@/../shared/userRole";
 import { Toaster } from "./components/ui/sonner";
@@ -68,6 +69,11 @@ const authenticatedRoutes: {
     path: "/admin/access",
     element: <AdminAccessPage />,
     allowedRoles: ["admin"] as const,
+  },
+  {
+    path: "/account",
+    element: <AccountPage />,
+    allowedRoles: ["admin", "employee", "client"] as const,
   },
 ];
 
