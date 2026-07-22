@@ -1,9 +1,11 @@
 import { mutation, query } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
+import { requireRole } from "./authorization";
 
 export const getUnits = query({
   args: {},
   handler: async (ctx) => {
+    await requireRole(ctx, ["admin", "employee", "client"]);
     return await ctx.db.query("units").withIndex("by_sortOrder").collect();
   },
 });
@@ -14,6 +16,7 @@ export const addUnit = mutation({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin"]);
     const existing = await ctx.db.query("units").collect();
 
     if (existing.find((unit) => unit.name === args.name)) {
@@ -39,6 +42,7 @@ export const updateUnit = mutation({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin"]);
     await ctx.db.patch(args.id, {
       name: args.name.trim(),
     });
@@ -51,6 +55,7 @@ export const deleteUnit = mutation({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin"]);
     const item = await ctx.db
       .query("itemCatalog")
       .filter((q) => q.eq(q.field("unitId"), args.id))

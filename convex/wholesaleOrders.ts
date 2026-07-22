@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { requireRole } from "./authorization";
 
 export const createWholesaleOrder = mutation({
   args: {
@@ -15,6 +16,7 @@ export const createWholesaleOrder = mutation({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin", "client"]);
     const orderId = await ctx.db.insert("wholesaleOrders", {
       clientName: args.clientName,
       email: args.email,
@@ -30,6 +32,7 @@ export const createWholesaleOrder = mutation({
 export const getWholesaleOrders = query({
   args: {},
   handler: async (ctx) => {
+    await requireRole(ctx, ["admin"]);
     return await ctx.db.query("wholesaleOrders").collect();
   },
 });
@@ -39,6 +42,7 @@ export const getWholesaleOrder = query({
     orderId: v.id("wholesaleOrders"),
   },
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin"]);
     return await ctx.db.get(args.orderId);
   },
 });

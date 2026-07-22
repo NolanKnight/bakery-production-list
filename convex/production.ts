@@ -1,7 +1,8 @@
 import { query, mutation } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
 import { getCatalog } from "./itemCatalog";
-import { Doc, Id } from "./_generated/dataModel";
+import { Id } from "./_generated/dataModel";
+import { requireRole } from "./authorization";
 
 export const getDailyProduction = query({
   args: {
@@ -9,6 +10,7 @@ export const getDailyProduction = query({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin", "employee"]);
     const catalog = await getCatalog(ctx);
 
     const orders = await ctx.db
@@ -29,10 +31,6 @@ export const getDailyProduction = query({
 
     // ---- PAR MAP ----
     const parMap: Record<Id<"itemCatalog">, number> = {};
-    Array(6)
-      .fill(0)
-      .map((v, i) => i);
-    catalog.flatMap((v) => v.items);
     for (const p of catalog.flatMap((entry) => entry.items)) {
       parMap[p._id] = p.par;
     }
@@ -79,6 +77,7 @@ export const getOverrides = query({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin", "employee"]);
     return await ctx.db
       .query("productionOverrides")
       .withIndex("by_date_item", (q) => q.eq("date", args.date))
@@ -94,6 +93,7 @@ export const setOverride = mutation({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin", "employee"]);
     const existing = await ctx.db
       .query("productionOverrides")
       .withIndex("by_date_item", (q) =>
@@ -126,6 +126,7 @@ export const deleteOverride = mutation({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin", "employee"]);
     return await ctx.db.delete("productionOverrides", args.overrideId);
   },
 });
@@ -134,6 +135,7 @@ export const getLock = query({
   args: { date: v.string() },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin", "employee"]);
     return await ctx.db
       .query("productionLocks")
       .withIndex("by_date", (q) => q.eq("date", args.date))
@@ -147,6 +149,7 @@ export const toggleLock = mutation({
   },
 
   handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin", "employee"]);
     const existing = await ctx.db
       .query("productionLocks")
       .withIndex("by_date", (q) => q.eq("date", args.date))
