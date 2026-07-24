@@ -9,6 +9,7 @@ export default defineSchema({
     sortOrder: v.number(),
     active: v.boolean(),
     par: v.number(),
+    currentInventory: v.number(),
   })
     .index("by_categoryId", ["categoryId"])
     .index("by_sortOrder", ["sortOrder"]),

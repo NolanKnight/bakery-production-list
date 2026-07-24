@@ -1,39 +1,43 @@
-import { cn } from "@/lib/utils";
-import { useLocation, Link } from "react-router-dom";
 import UserRole from "@/../shared/userRole";
-import { buttonVariants } from "./ui/button";
+import { Navigation, isLink } from "../../shared/links";
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "./ui/navigation-menu";
 
 export default function NavBar({ userRole }: { userRole: UserRole }) {
-  const location = useLocation();
-
-  if (location.pathname.includes("/production/print")) {
-    return null;
-  }
-
   return (
     <div className="w-full bg-inherit z-10 p-4 sticky top-0 flex justify-center print:hidden">
-      <div className="w-fit p-2 border border-black">
-        <div className="flex gap-4">
-          {userRole.links.map((link) => {
-            const active = location.pathname === link.path;
+      <NavigationMenu className="w-fit p-2 border border-black">
+        <NavigationMenuList>
+          {Navigation.map((item) => {
+            if (isLink(item)) {
+              if (!userRole.links.includes(item)) return;
+
+              return (
+                <NavigationMenuItem>
+                  <NavigationMenuLink href={item.path} className={navigationMenuTriggerStyle()}>
+                    {item.name}
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              );
+            }
+
+            if (item.links.every((link) => !userRole.links.includes(link))) return;
 
             return (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={cn(
-                  "transition p-1.5 text-sm font-medium",
-                  active
-                    ? buttonVariants()
-                    : buttonVariants({ variant: "ghost" }),
-                )}
-              >
-                {link.name}
-              </Link>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>{item.name}</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  {item.links.map((link) => {
+                  if (!userRole.links.includes(link)) return;
+                  
+                  return <NavigationMenuLink href={link.path} className={navigationMenuTriggerStyle()}>
+                    {link.name}
+                  </NavigationMenuLink>})}
+                </NavigationMenuContent>
+              </NavigationMenuItem>
             );
           })}
-        </div>
-      </div>
+        </NavigationMenuList>
+      </NavigationMenu>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Doc, Id } from "convex/_generated/dataModel";
 import { toastError } from "@/lib/errors";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
+import Loading from "@/components/loading";
 
 export default function ParPage() {
   const catalog = useQuery(api.itemCatalog.getItems);
@@ -52,7 +53,7 @@ export default function ParPage() {
     });
   };
 
-  if (!catalog || !units || !catalogPars) return undefined;
+  if (!catalog || !units || !catalogPars) return <Loading />;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">

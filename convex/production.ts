@@ -51,8 +51,10 @@ export const getDailyProduction = query({
       items: entry.items.map((item) => {
         const par = parMap[item._id] ?? 0;
         const wholesale = wholesaleMap[item._id] ?? 0;
+        const needed = par + wholesale;
+        const inventory = item.currentInventory;
 
-        const computed = par + wholesale;
+        const computed = needed - inventory;
         const override = overrideMap[item._id];
 
         return {
@@ -61,6 +63,7 @@ export const getDailyProduction = query({
           unitId: item.unitId,
           par,
           wholesale,
+          currentInventory: inventory,
           computedTotal: computed,
           finalTotal: override ?? computed,
         };

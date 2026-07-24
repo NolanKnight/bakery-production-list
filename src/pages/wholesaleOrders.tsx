@@ -11,12 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Loading from "@/components/loading";
 
 export default function WholesaleOrdersPage() {
   const orders = useQuery(api.wholesaleOrders.getWholesaleOrders);
   const navigate = useNavigate();
 
-  if (!orders) return undefined;
+  if (!orders) return <Loading />;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">
