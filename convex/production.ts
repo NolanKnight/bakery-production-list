@@ -3,6 +3,7 @@ import { ConvexError, v } from "convex/values";
 import { getCatalog } from "./itemCatalog";
 import { Id } from "./_generated/dataModel";
 import { requireRole } from "./authorization";
+import { getWeekdayNameFromDate, normalizeWeekdayParValues } from "./weekdayPar";
 
 export const getDailyProduction = query({
   args: {
@@ -12,6 +13,7 @@ export const getDailyProduction = query({
   handler: async (ctx, args) => {
     await requireRole(ctx, ["admin", "employee"]);
     const catalog = await getCatalog(ctx);
+    const weekday = getWeekdayNameFromDate(args.date);
 
     const orders = await ctx.db
       .query("wholesaleOrders")
@@ -29,12 +31,6 @@ export const getDailyProduction = query({
       overrideMap[o.itemId] = o.overrideQuantity;
     }
 
-    // ---- PAR MAP ----
-    const parMap: Record<Id<"itemCatalog">, number> = {};
-    for (const p of catalog.flatMap((entry) => entry.items)) {
-      parMap[p._id] = p.par;
-    }
-
     // ---- WHOLESALE SUM ----
     const wholesaleMap: Record<Id<"itemCatalog">, number> = {};
 
@@ -49,7 +45,7 @@ export const getDailyProduction = query({
     const result = catalog.map((entry) => ({
       category: entry.category,
       items: entry.items.map((item) => {
-        const par = parMap[item._id] ?? 0;
+        const par = normalizeWeekdayParValues(item.par)[weekday] ?? 0;
         const wholesale = wholesaleMap[item._id] ?? 0;
         const needed = par + wholesale;
         const inventory = item.currentInventory;

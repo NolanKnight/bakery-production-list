@@ -8,12 +8,28 @@ import { toastError } from "@/lib/errors";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import Loading from "@/components/loading";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  getTodayWeekdayName,
+  isWeekdayName,
+  normalizeWeekdayParValues,
+  weekdayLabelByName,
+  weekdayNames,
+  WeekdayName,
+} from "@/lib/weekdayPar";
 
 export default function ParPage() {
   const catalog = useQuery(api.itemCatalog.getItems);
   const units = useQuery(api.units.getUnits);
 
   const updatePar = useMutation(api.itemCatalog.updateItemPar);
+  const [selectedDay, setSelectedDay] = useState<WeekdayName>(getTodayWeekdayName());
 
   const [catalogPars, setCatalogPars] =
     useState<Map<Id<"itemCatalog">, number>>();
@@ -25,11 +41,11 @@ export default function ParPage() {
       catalog
         .flatMap((entry) => entry.items)
         .reduce((acc, { _id, par }) => {
-          acc.set(_id, par);
+          acc.set(_id, normalizeWeekdayParValues(par)[selectedDay]);
           return acc;
         }, new Map<Id<"itemCatalog">, number>()),
     );
-  }, [catalog]);
+  }, [catalog, selectedDay]);
 
   const getUnit = (id: Id<"units">) => {
     if (!units) return;
@@ -65,6 +81,31 @@ export default function ParPage() {
         </p>
       </div>
 
+      <Card>
+        <CardContent className="flex items-center gap-3">
+          <span className="text-sm font-medium">Editing day:</span>
+          <Select
+            value={selectedDay}
+            onValueChange={(value) => {
+              if (value && isWeekdayName(value)) {
+                setSelectedDay(value);
+              }
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue className="capitalize" />
+            </SelectTrigger>
+            <SelectContent>
+              {weekdayNames.map((day) => (
+                <SelectItem key={day} value={day}>
+                  {weekdayLabelByName[day]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
       {catalog.map((entry) => (
         <Card key={entry.category._id}>
           <CardHeader>
@@ -89,6 +130,7 @@ export default function ParPage() {
                     onBlur={async (e) => {
                       await updatePar({
                         id: item._id,
+                        day: selectedDay,
                         par: Number(e.target.value),
                       })
                         .then(() => {
