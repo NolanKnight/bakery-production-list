@@ -1,7 +1,12 @@
 import { Doc } from "./_generated/dataModel";
 import { query, mutation, QueryCtx } from "./_generated/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { requireRole } from "./authorization";
+import {
+  createWeekdayParValues,
+  normalizeWeekdayParValues,
+  weekdayNameValidator,
+} from "./weekdayPar";
 
 export const getCatalog = async (ctx: QueryCtx) => {
   const categories = await ctx.db.query("categories").collect();
@@ -67,7 +72,7 @@ export const addItem = mutation({
       unitId: args.unitId,
       sortOrder,
       active: true,
-      par: 0,
+      par: createWeekdayParValues(0),
       currentInventory: 0,
     });
   },
@@ -105,11 +110,25 @@ export const updateItem = mutation({
 export const updateItemPar = mutation({
   args: {
     id: v.id("itemCatalog"),
+    day: weekdayNameValidator,
     par: v.number(),
   },
   handler: async (ctx, args) => {
     await requireRole(ctx, ["admin"]);
-    await ctx.db.patch("itemCatalog", args.id, { par: args.par });
+    const item = await ctx.db.get(args.id);
+
+    if (!item) {
+      throw new ConvexError({ message: "Item not found." });
+    }
+
+    const currentPar = normalizeWeekdayParValues(item.par);
+
+    await ctx.db.patch(args.id, {
+      par: {
+        ...currentPar,
+        [args.day]: args.par,
+      },
+    });
   },
 });
 

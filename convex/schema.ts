@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { weekdayParValidator } from "./weekdayPar";
 
 export default defineSchema({
   itemCatalog: defineTable({
@@ -8,7 +9,7 @@ export default defineSchema({
     unitId: v.id("units"),
     sortOrder: v.number(),
     active: v.boolean(),
-    par: v.number(),
+    par: v.union(v.number(), weekdayParValidator),
     currentInventory: v.number(),
   })
     .index("by_categoryId", ["categoryId"])
