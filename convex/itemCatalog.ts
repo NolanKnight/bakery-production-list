@@ -68,6 +68,7 @@ export const addItem = mutation({
       sortOrder,
       active: true,
       par: 0,
+      currentInventory: 0,
     });
   },
 });
@@ -109,5 +110,18 @@ export const updateItemPar = mutation({
   handler: async (ctx, args) => {
     await requireRole(ctx, ["admin"]);
     await ctx.db.patch("itemCatalog", args.id, { par: args.par });
+  },
+});
+
+export const updateItemInventory = mutation({
+  args: {
+    id: v.id("itemCatalog"),
+    currentInventory: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin", "employee"]);
+    await ctx.db.patch("itemCatalog", args.id, {
+      currentInventory: args.currentInventory,
+    });
   },
 });

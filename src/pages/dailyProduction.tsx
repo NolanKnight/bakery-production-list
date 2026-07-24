@@ -25,6 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import Loading from "@/components/loading";
 
 export default function DailyProductionPage() {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -67,15 +68,23 @@ export default function DailyProductionPage() {
     }
   };
 
-  if (!data) return undefined;
+  if (!data) return <Loading />;
 
   return (
     <div className="mx-auto max-w-5xl p-6 space-y-6">
-      <Card className="">
-        <CardHeader>
+      <h3 className="text-xl font-bold">Daily Production</h3>
+      <Card>
+        <CardContent>
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold">Daily Production</h1>
-
+            <div className="flex items-center gap-4">
+              <span className="font-medium">Date:</span>
+              <Input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-48"
+              />
+            </div>
             <div className="flex items-center gap-2 print:hidden">
               <Button variant="outline" onClick={handlePrint}>
                 Print
@@ -88,18 +97,6 @@ export default function DailyProductionPage() {
                 {lock?.locked ? "Unlock Sheet" : "Lock Sheet"}
               </Button>
             </div>
-          </div>
-        </CardHeader>
-
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <span className="font-medium">Date:</span>
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-48"
-            />
           </div>
         </CardContent>
       </Card>
@@ -115,9 +112,10 @@ export default function DailyProductionPage() {
             <Table className="text-center">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="">Item</TableHead>
+                  <TableHead>Item</TableHead>
                   <TableHead className="text-center">Par</TableHead>
                   <TableHead className="text-center">Wholesale</TableHead>
+                  <TableHead className="text-center">Inventory</TableHead>
                   <TableHead className="text-center">Computed</TableHead>
                   <TableHead className="text-center">Override</TableHead>
                   <TableHead className="text-center">Final</TableHead>
@@ -131,6 +129,7 @@ export default function DailyProductionPage() {
                     </TableCell>
                     <TableCell>{item.par}</TableCell>
                     <TableCell>{item.wholesale}</TableCell>
+                    <TableCell>{item.currentInventory}</TableCell>
                     <TableCell>{item.computedTotal}</TableCell>
                     <TableCell>
                       <Input

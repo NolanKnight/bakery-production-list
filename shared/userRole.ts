@@ -2,6 +2,7 @@ import {
   Account,
   AccessManagement,
   ItemCatalog,
+  Inventory,
   Link,
   Par,
   Production,
@@ -26,11 +27,13 @@ export default class UserRole {
     WholesaleForm,
     WholesaleOrders,
     Production,
+    Inventory,
     ItemCatalog,
     AccessManagement,
     Account,
   ]);
   public static readonly Employee: UserRole = new UserRole("employee", "Employee", [
+    Inventory,
     Production,
     Account,
   ]);

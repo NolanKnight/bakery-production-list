@@ -16,6 +16,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MoveLeft } from "lucide-react";
+import Loading from "@/components/loading";
 
 export default function WholesaleOrderPage() {
   const { id } = useParams<{ id: string }>();
@@ -47,7 +48,7 @@ export default function WholesaleOrderPage() {
     return lookup;
   }, [catalog, units]);
 
-  if (!catalog || !units) return undefined;
+  if (!catalog || !units) return <Loading />;
 
   if (!order) {
     return (

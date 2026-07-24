@@ -9,6 +9,7 @@ import NewCategoryCard from "@/components/catalog/newCategoryCard";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import UnitRow from "@/components/units/UnitRow";
 import NewUnitRow from "@/components/units/NewUnitRow";
+import Loading from "@/components/loading";
 
 export default function ItemCatalogPage() {
   const catalog = useQuery(api.itemCatalog.getItems);
@@ -17,7 +18,7 @@ export default function ItemCatalogPage() {
   const [addingCategory, setAddingCategory] = useState(false);
   const [addingUnit, setAddingUnit] = useState(false);
 
-  if (catalog === undefined) return undefined;
+  if (!catalog) return <Loading />;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">

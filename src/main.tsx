@@ -26,6 +26,7 @@ import AccountPage from "./pages/account";
 import { api } from "../convex/_generated/api";
 import type { UserRoleValue } from "@/../shared/userRole";
 import { Toaster } from "./components/ui/sonner";
+import InventoryPage from "./pages/inventory";
 
 const convex = new ConvexReactClient(
   import.meta.env.VITE_CONVEX_URL as string,
@@ -58,6 +59,11 @@ const authenticatedRoutes: {
   {
     path: "/production",
     element: <DailyProductionPage />,
+    allowedRoles: ["admin", "employee"] as const,
+  },
+  {
+    path: "/inventory",
+    element: <InventoryPage />,
     allowedRoles: ["admin", "employee"] as const,
   },
   {

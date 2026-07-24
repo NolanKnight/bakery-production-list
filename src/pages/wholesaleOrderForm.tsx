@@ -9,6 +9,7 @@ import { Id } from "convex/_generated/dataModel";
 import { toastError } from "@/lib/errors";
 import { toast } from "sonner";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import Loading from "@/components/loading";
 
 type OrderValues = { itemId: Id<"itemCatalog">; quantity: number }[];
 
@@ -70,7 +71,7 @@ export default function WholesaleOrderForm() {
     }
   };
 
-  if (!catalog) return undefined;
+  if (!catalog) return <Loading />;
 
   return (
     <div className="mx-auto max-w-4xl p-6 space-y-6">
