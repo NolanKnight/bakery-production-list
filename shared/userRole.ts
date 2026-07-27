@@ -1,6 +1,7 @@
 import {
   Account,
   AccessManagement,
+  BakerRoles,
   ItemCatalog,
   Inventory,
   Link,
@@ -30,6 +31,7 @@ export default class UserRole {
     Inventory,
     ItemCatalog,
     AccessManagement,
+    BakerRoles,
     Account,
   ]);
   public static readonly Employee: UserRole = new UserRole("employee", "Employee", [

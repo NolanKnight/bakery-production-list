@@ -15,17 +15,12 @@ export default function SignupPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
-    console.log("handleSubmit");
     event.preventDefault();
-    console.log("preventedDefault");
 
     if (password !== confirmPassword) {
-      console.log("Passwords don't match");
       toast.error("Passwords do not match.");
       return;
     }
-
-    console.log("Passwords match");
 
     setIsSubmitting(true);
 

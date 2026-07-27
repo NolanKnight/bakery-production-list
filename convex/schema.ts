@@ -61,4 +61,15 @@ export default defineSchema({
     .index("by_email_and_status", ["email", "status"])
     .index("by_status_and_createdAt", ["status", "createdAt"])
     .index("by_source_and_status", ["source", "status"]),
+  bakerRoles: defineTable({
+    name: v.string(),
+    normalizedName: v.string(),
+    createdAt: v.number(),
+  }).index("by_normalizedName", ["normalizedName"]),
+  bakerRoleItems: defineTable({
+    bakerRoleId: v.id("bakerRoles"),
+    itemId: v.id("itemCatalog"),
+  })
+    .index("by_bakerRoleId", ["bakerRoleId"])
+    .index("by_bakerRoleId_and_itemId", ["bakerRoleId", "itemId"]),
 });

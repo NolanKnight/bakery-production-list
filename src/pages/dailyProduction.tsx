@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Id } from "convex/_generated/dataModel";
+import { Doc, Id } from "convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { toastError } from "@/lib/errors";
 import {
@@ -26,10 +26,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import Loading from "@/components/loading";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function DailyProductionPage() {
+  const none = { name: "None (all items)" };
+
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [showPrintWarning, setShowPrintWarning] = useState(false);
+  const [selectedBakerRole, setSelectedBakerRole] = useState<Doc<"bakerRoles"> | typeof none>(none);
 
   const setOverride = useMutation(api.production.setOverride);
   const overrides = useQuery(api.production.getOverrides, { date });
@@ -39,6 +43,7 @@ export default function DailyProductionPage() {
   const toggleLock = useMutation(api.production.toggleLock);
 
   const data = useQuery(api.production.getDailyProduction, { date });
+  const bakerRoles = useQuery(api.bakerRoles.listRolesForProduction);
 
   const updateOverride = (itemId: Id<"itemCatalog">, value: string) => {
     const override = getOverride(itemId);
@@ -68,7 +73,34 @@ export default function DailyProductionPage() {
     }
   };
 
-  if (!data) return <Loading />;
+  const effectiveSelectedBakerRole =
+    selectedBakerRole === none || bakerRoles?.some((role) => role === selectedBakerRole)
+      ? selectedBakerRole
+      : none;
+
+  const selectedRole =
+    effectiveSelectedBakerRole === none
+      ? null
+      : bakerRoles?.find((role) => role === effectiveSelectedBakerRole) ?? null;
+
+  const selectedRoleItemIds = useMemo(
+    () => (selectedRole ? new Set(selectedRole.itemIds) : null),
+    [selectedRole],
+  );
+
+  const visibleData = useMemo(() => {
+    if (!data) return null;
+    if (!selectedRoleItemIds) return data;
+
+    return data
+      .map((entry) => ({
+        ...entry,
+        items: entry.items.filter((item) => selectedRoleItemIds.has(item.itemId)),
+      }))
+      .filter((entry) => entry.items.length > 0);
+  }, [data, selectedRoleItemIds]);
+
+  if (!data || !visibleData) return <Loading />;
 
   return (
     <div className="mx-auto max-w-5xl p-6 space-y-6">
@@ -84,6 +116,22 @@ export default function DailyProductionPage() {
                 onChange={(e) => setDate(e.target.value)}
                 className="w-48"
               />
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Baker role:</span>
+                <Select value={effectiveSelectedBakerRole} itemToStringLabel={(item) => item.name} onValueChange={(v) => { if (v) setSelectedBakerRole(v) }}>
+                  <SelectTrigger className="w-52">
+                    <SelectValue placeholder={none.name} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={none}>{none.name}</SelectItem>
+                    {bakerRoles?.map((role) => (
+                      <SelectItem key={role._id} value={role}>
+                        {role.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="flex items-center gap-2 print:hidden">
               <Button variant="outline" onClick={handlePrint}>
@@ -91,7 +139,7 @@ export default function DailyProductionPage() {
               </Button>
 
               <Button
-                onClick={() => toggleLock({ date }).catch(toastError)}
+                onClick={() => void toggleLock({ date }).catch(toastError)}
                 variant={lock?.locked ? "destructive" : "default"}
               >
                 {lock?.locked ? "Unlock Sheet" : "Lock Sheet"}
@@ -102,7 +150,7 @@ export default function DailyProductionPage() {
       </Card>
 
       {/* Production List */}
-      {data.map((entry) => (
+      {visibleData.map((entry) => (
         <Card key={entry.category._id}>
           <CardHeader>
             <CardTitle>{entry.category.name}</CardTitle>

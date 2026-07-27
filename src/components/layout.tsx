@@ -10,7 +10,6 @@ export default function Layout({
   children: ReactNode;
   userRole: UserRole;
 }) {
-  console.log(children);
   return (
     <div className="w-full h-full min-h-screen bg-blue-200 print:bg-white flex flex-col items-center justify-center">
       <Header title={`${userRole.name} Portal`} />
