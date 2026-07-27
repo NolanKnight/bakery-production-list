@@ -5,7 +5,7 @@ import { DataModel } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { betterAuth } from "better-auth/minimal";
 import { ConvexError, v } from "convex/values";
-import type { AssignableUserRole, UserRoleValue } from "../shared/userRole";
+import type { UserRoleValue } from "../shared/userRole";
 import authConfig from "./auth.config";
 
 const siteUrl = process.env.SITE_URL!;

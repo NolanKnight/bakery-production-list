@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Id } from "convex/_generated/dataModel";
+import { Id } from "../../../convex/_generated/dataModel";
 
 type Props = {
   onSave: (name: string, unit: Id<"units">) => Promise<void>;

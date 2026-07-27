@@ -5,7 +5,7 @@ import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Id } from "convex/_generated/dataModel";
+import { Id } from "../../convex/_generated/dataModel";
 import { toastError } from "@/lib/errors";
 import { toast } from "sonner";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
