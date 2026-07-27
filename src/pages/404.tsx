@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { InputGroup, InputGroupInput, InputGroupAddon } from '@/components/ui/input-group';
 import { SearchIcon } from 'lucide-react';
-import { Link } from 'shared/links';
+import { Link } from '../../shared/links';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 

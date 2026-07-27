@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Doc, Id } from "convex/_generated/dataModel";
+import { Doc, Id } from "../../convex/_generated/dataModel";
 import { toastError } from "@/lib/errors";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
