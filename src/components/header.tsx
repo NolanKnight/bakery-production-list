@@ -1,4 +1,5 @@
 import { Separator } from "./ui/separator";
+import Flower from "../assets/flower.png";
 
 export default function Header({ title }: { title: string }) {
   return (
@@ -6,7 +7,7 @@ export default function Header({ title }: { title: string }) {
       <h1 className="text-center text-6xl font-heading mb-4">
         Buttercup Bakery
       </h1>
-      <img src="flower.png" />
+      <img src={Flower} />
       <div className="flex flex-row items-center justify-center w-[25vw] text-center">
         <Separator className="bg-black" />
         <h2 className="uppercase text-4xl font-extralight font-sans text-nowrap p-6">
