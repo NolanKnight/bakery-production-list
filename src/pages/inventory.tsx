@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toastError } from "@/lib/errors";
 import Loading from "@/components/loading";
+import { toast } from "sonner";
 
 export default function InventoryPage() {
   const catalog = useQuery(api.itemCatalog.getItems);
@@ -92,7 +93,19 @@ export default function InventoryPage() {
                     updateInventory({
                       id: item._id,
                       currentInventory: Number(e.target.value),
-                    }).catch(toastError);
+                    })
+                      .then(() => {
+                        toast.success(
+                          <p>
+                            Successfully updated{" "}
+                            <b>
+                              {entry.category.name} : {item.name}
+                            </b>{" "}
+                            inventory.
+                          </p>,
+                        );
+                      })
+                      .catch(toastError);
                   }}
                 />
 
