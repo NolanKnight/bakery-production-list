@@ -2,7 +2,12 @@ import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex, crossDomain } from "@convex-dev/better-auth/plugins";
 import { components } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
-import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
+import {
+  mutation,
+  query,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server";
 import { betterAuth } from "better-auth/minimal";
 import { ConvexError, v } from "convex/values";
 import type { UserRoleValue } from "../shared/userRole";
@@ -20,7 +25,10 @@ const assignableRoleValidator = v.union(
   v.literal("employee"),
   v.literal("client"),
 );
-const invitationSourceValidator = v.union(v.literal("invite"), v.literal("request"));
+const invitationSourceValidator = v.union(
+  v.literal("invite"),
+  v.literal("request"),
+);
 const invitationStatusValidator = v.union(
   v.literal("pending"),
   v.literal("accepted"),
@@ -58,7 +66,8 @@ const resolveRoleForEmail = async (
       continue;
     }
     const inviteTimestamp = invite.resolvedAt ?? invite.createdAt;
-    const latestTimestamp = latestAccepted.resolvedAt ?? latestAccepted.createdAt;
+    const latestTimestamp =
+      latestAccepted.resolvedAt ?? latestAccepted.createdAt;
     if (inviteTimestamp > latestTimestamp) {
       latestAccepted = invite;
     }
@@ -102,10 +111,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
       enabled: true,
       requireEmailVerification: false,
     },
-    plugins: [
-      crossDomain({ siteUrl }),
-      convex({ authConfig }),
-    ],
+    plugins: [crossDomain({ siteUrl }), convex({ authConfig })],
   });
 };
 
@@ -295,7 +301,9 @@ export const listInvitations = query({
       .collect();
 
     if (args.source) {
-      invitations = invitations.filter((invitation) => invitation.source === args.source);
+      invitations = invitations.filter(
+        (invitation) => invitation.source === args.source,
+      );
     }
 
     return invitations.sort((a, b) => b.createdAt - a.createdAt);
@@ -314,7 +322,9 @@ export const resolveInvitation = mutation({
       throw new ConvexError({ message: "Invitation not found." });
     }
     if (invitation.status !== "pending") {
-      throw new ConvexError({ message: "Invitation has already been resolved." });
+      throw new ConvexError({
+        message: "Invitation has already been resolved.",
+      });
     }
 
     await ctx.db.patch(invitation._id, {

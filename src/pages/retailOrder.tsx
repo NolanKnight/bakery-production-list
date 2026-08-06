@@ -16,14 +16,13 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MoveLeft } from "lucide-react";
-import Loading from "@/components/loading";
 
-export default function WholesaleOrderPage() {
+export default function RetailOrderPage() {
   const { id } = useParams<{ id: string }>();
-  const orderId = id as Id<"wholesaleOrders"> | undefined;
+  const orderId = id as Id<"retailOrders"> | undefined;
 
   const order = useQuery(
-    api.wholesaleOrders.getWholesaleOrder,
+    api.retailOrders.getRetailOrder,
     orderId ? { orderId } : "skip",
   );
   const catalog = useQuery(api.itemCatalog.getItems);
@@ -34,11 +33,9 @@ export default function WholesaleOrderPage() {
       Id<"itemCatalog">,
       { name: string; unitName: string }
     >();
-
     if (!catalog || !units) return lookup;
 
     const unitNameById = new Map(units.map((unit) => [unit._id, unit.name]));
-
     for (const category of catalog) {
       for (const item of category.items) {
         lookup.set(item._id, {
@@ -51,12 +48,12 @@ export default function WholesaleOrderPage() {
     return lookup;
   }, [catalog, units]);
 
-  if (!catalog || !units) return <Loading />;
+  if (!catalog || !units) return undefined;
 
   if (!order) {
     return (
       <div className="mx-auto max-w-4xl space-y-6 p-6">
-        <h3>Wholesale Order</h3>
+        <h3>Retail Order</h3>
         <p className="text-muted-foreground">Order not found.</p>
       </div>
     );
@@ -66,7 +63,7 @@ export default function WholesaleOrderPage() {
     <div className="mx-auto max-w-4xl space-y-6 p-6">
       <div className="flex flex-col items-start">
         <Link
-          to="/wholesale-orders"
+          to="/retail-orders"
           className={cn(
             buttonVariants({ variant: "link", size: "lg" }),
             "px-0",
@@ -75,24 +72,29 @@ export default function WholesaleOrderPage() {
           <MoveLeft />
           Back to orders
         </Link>
-        <h3>Wholesale Order</h3>
+        <h3>Retail Order</h3>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>{order.clientName}</CardTitle>
+          <CardTitle>{order.customer.name ?? "Unknown customer"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           <p>
-            <span className="font-medium">Email:</span> {order.email}
+            <span className="font-medium">Email:</span>{" "}
+            {order.customer.email ?? "No email provided"}
+          </p>
+          <p>
+            <span className="font-medium">Phone:</span>{" "}
+            {order.customer.phone ?? "No phone provided"}
           </p>
           <p>
             <span className="font-medium">Desired Date:</span>{" "}
             {order.desiredDate}
           </p>
           <p>
-            <span className="font-medium">Submitted:</span>{" "}
-            {new Date(order.createdAt).toLocaleString()}
+            <span className="font-medium">Source:</span>{" "}
+            {order.sourceName ?? "Unknown source"}
           </p>
         </CardContent>
       </Card>
@@ -113,14 +115,14 @@ export default function WholesaleOrderPage() {
               </TableHeader>
 
               <TableBody>
-                {order.items.map((item) => {
+                {order.items.map((item, index) => {
                   const details = itemLookup.get(item.itemId);
                   const unitName = details?.unitName
                     ? ` ${details.unitName}`
                     : "";
 
                   return (
-                    <TableRow key={item.itemId}>
+                    <TableRow key={`${item.itemId}-${index}`}>
                       <TableCell>{details?.name ?? item.itemId}</TableCell>
                       <TableCell className="text-right">
                         {item.quantity}

@@ -65,7 +65,9 @@ export default function AccountPage() {
                 disabled
                 readOnly
               />
-              <FieldDescription>Email changes are not available yet.</FieldDescription>
+              <FieldDescription>
+                Email changes are not available yet.
+              </FieldDescription>
             </Field>
             <Button type="submit" disabled={isSaving}>
               {isSaving ? "Saving..." : "Save profile"}

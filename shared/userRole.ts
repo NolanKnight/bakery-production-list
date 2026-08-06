@@ -7,6 +7,7 @@ import {
   Link,
   Par,
   Production,
+  RetailOrders,
   WholesaleForm,
   WholesaleOrders,
 } from "./links";
@@ -27,6 +28,7 @@ export default class UserRole {
     Par,
     WholesaleForm,
     WholesaleOrders,
+    RetailOrders,
     Production,
     Inventory,
     ItemCatalog,
@@ -34,11 +36,11 @@ export default class UserRole {
     BakerRoles,
     Account,
   ]);
-  public static readonly Employee: UserRole = new UserRole("employee", "Employee", [
-    Inventory,
-    Production,
-    Account,
-  ]);
+  public static readonly Employee: UserRole = new UserRole(
+    "employee",
+    "Employee",
+    [Inventory, Production, Account],
+  );
   public static readonly Client: UserRole = new UserRole("client", "Client", [
     WholesaleForm,
     Account,

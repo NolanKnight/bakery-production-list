@@ -4,7 +4,7 @@ import { api } from "../../convex/_generated/api";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Doc, Id } from "../../convex/_generated/dataModel";
+import { Id } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { toastError } from "@/lib/errors";
 import {
@@ -26,14 +26,20 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import Loading from "@/components/loading";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function DailyProductionPage() {
   const none = { name: "None (all items)" };
 
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [showPrintWarning, setShowPrintWarning] = useState(false);
-  const [selectedBakerRole, setSelectedBakerRole] = useState<Doc<"bakerRoles"> | typeof none>(none);
+  const [selectedBakerRole, setSelectedBakerRole] = useState<typeof none>(none);
 
   const setOverride = useMutation(api.production.setOverride);
   const overrides = useQuery(api.production.getOverrides, { date });
@@ -62,7 +68,9 @@ export default function DailyProductionPage() {
 
   const getOverride = (itemId: Id<"itemCatalog">) => {
     if (!overrides) return null;
-    return overrides.find((o) => o.itemId === itemId && o.date === date) ?? null;
+    return (
+      overrides.find((o) => o.itemId === itemId && o.date === date) ?? null
+    );
   };
 
   const handlePrint = () => {
@@ -74,14 +82,16 @@ export default function DailyProductionPage() {
   };
 
   const effectiveSelectedBakerRole =
-    selectedBakerRole === none || bakerRoles?.some((role) => role === selectedBakerRole)
+    selectedBakerRole === none ||
+    bakerRoles?.some((role) => role === selectedBakerRole)
       ? selectedBakerRole
       : none;
 
   const selectedRole =
     effectiveSelectedBakerRole === none
       ? null
-      : bakerRoles?.find((role) => role === effectiveSelectedBakerRole) ?? null;
+      : (bakerRoles?.find((role) => role === effectiveSelectedBakerRole) ??
+        null);
 
   const selectedRoleItemIds = useMemo(
     () => (selectedRole ? new Set(selectedRole.itemIds) : null),
@@ -95,7 +105,9 @@ export default function DailyProductionPage() {
     return data
       .map((entry) => ({
         ...entry,
-        items: entry.items.filter((item) => selectedRoleItemIds.has(item.itemId)),
+        items: entry.items.filter((item) =>
+          selectedRoleItemIds.has(item.itemId),
+        ),
       }))
       .filter((entry) => entry.items.length > 0);
   }, [data, selectedRoleItemIds]);
@@ -118,7 +130,13 @@ export default function DailyProductionPage() {
               />
               <div className="flex items-center gap-2">
                 <span className="font-medium">Baker role:</span>
-                <Select value={effectiveSelectedBakerRole} itemToStringLabel={(item) => item.name} onValueChange={(v) => { if (v) setSelectedBakerRole(v) }}>
+                <Select
+                  value={effectiveSelectedBakerRole}
+                  itemToStringLabel={(item) => item.name}
+                  onValueChange={(v) => {
+                    if (v) setSelectedBakerRole(v);
+                  }}
+                >
                   <SelectTrigger className="w-52">
                     <SelectValue placeholder={none.name} />
                   </SelectTrigger>
@@ -163,6 +181,7 @@ export default function DailyProductionPage() {
                   <TableHead>Item</TableHead>
                   <TableHead className="text-center">Par</TableHead>
                   <TableHead className="text-center">Wholesale</TableHead>
+                  <TableHead className="text-center">Retail</TableHead>
                   <TableHead className="text-center">Inventory</TableHead>
                   <TableHead className="text-center">Computed</TableHead>
                   <TableHead className="text-center">Override</TableHead>
@@ -171,12 +190,16 @@ export default function DailyProductionPage() {
               </TableHeader>
               <TableBody>
                 {entry.items.map((item) => (
-                  <TableRow key={item.itemId} className="print:break-inside-avoid">
+                  <TableRow
+                    key={item.itemId}
+                    className="print:break-inside-avoid"
+                  >
                     <TableCell className="uppercase font-light text-left">
                       {item.name}
                     </TableCell>
                     <TableCell>{item.par}</TableCell>
                     <TableCell>{item.wholesale}</TableCell>
+                    <TableCell>{item.retail}</TableCell>
                     <TableCell>{item.currentInventory}</TableCell>
                     <TableCell>{item.computedTotal}</TableCell>
                     <TableCell>

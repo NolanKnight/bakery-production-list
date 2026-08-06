@@ -29,7 +29,9 @@ export default function ParPage() {
   const units = useQuery(api.units.getUnits);
 
   const updatePar = useMutation(api.itemCatalog.updateItemPar);
-  const [selectedDay, setSelectedDay] = useState<WeekdayName>(getTodayWeekdayName());
+  const [selectedDay, setSelectedDay] = useState<WeekdayName>(
+    getTodayWeekdayName(),
+  );
 
   const [catalogPars, setCatalogPars] =
     useState<Map<Id<"itemCatalog">, number>>();
@@ -113,40 +115,46 @@ export default function ParPage() {
           </CardHeader>
 
           <CardContent className="space-y-2">
-              {entry.items.map((item) => (
-                <div
-                  key={item._id}
-                  className="grid grid-cols-[1fr_120px_auto] items-center gap-4"
-                >
-                  <h5>{item.name}</h5>
+            {entry.items.map((item) => (
+              <div
+                key={item._id}
+                className="grid grid-cols-[1fr_120px_auto] items-center gap-4"
+              >
+                <h5>{item.name}</h5>
 
-                  <Input
-                    type="number"
-                    min={0}
-                    value={catalogPars.get(item._id)}
-                    onChange={(e) =>
-                      updateCatalogPars(catalogPars, item, e.target.value)
-                    }
-                    onBlur={async (e) => {
-                      await updatePar({
-                        id: item._id,
-                        day: selectedDay,
-                        par: Number(e.target.value),
+                <Input
+                  type="number"
+                  min={0}
+                  value={catalogPars.get(item._id)}
+                  onChange={(e) =>
+                    updateCatalogPars(catalogPars, item, e.target.value)
+                  }
+                  onBlur={async (e) => {
+                    await updatePar({
+                      id: item._id,
+                      day: selectedDay,
+                      par: Number(e.target.value),
+                    })
+                      .then(() => {
+                        toast.success(
+                          <p>
+                            Successfully updated{" "}
+                            <b>
+                              {entry.category.name} : {item.name}
+                            </b>{" "}
+                            par value.
+                          </p>,
+                        );
                       })
-                        .then(() => {
-                          toast.success(
-                            <p>Successfully updated <b>{entry.category.name} : {item.name}</b> par value.</p>,
-                          );
-                        })
-                        .catch(toastError);
-                    }}
-                  />
+                      .catch(toastError);
+                  }}
+                />
 
-                  <span className="text-muted-foreground">
-                    {getUnit(item.unitId)?.name}
-                  </span>
-                </div>
-              ))}
+                <span className="text-muted-foreground">
+                  {getUnit(item.unitId)?.name}
+                </span>
+              </div>
+            ))}
           </CardContent>
         </Card>
       ))}

@@ -11,14 +11,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import Checkbox from "@/components/checkbox";
-import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+} from "@/components/ui/accordion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 const getCategoryState = (
   itemIds: Id<"itemCatalog">[],
   selectedItemIds: Set<Id<"itemCatalog">>,
 ) => {
-  const selectedCount = itemIds.filter((itemId) => selectedItemIds.has(itemId)).length;
+  const selectedCount = itemIds.filter((itemId) =>
+    selectedItemIds.has(itemId),
+  ).length;
   return {
     allSelected: selectedCount === itemIds.length && itemIds.length > 0,
     partiallySelected: selectedCount > 0 && selectedCount < itemIds.length,
@@ -31,9 +37,9 @@ export default function BakerRolesPage() {
   const deleteRole = useMutation(api.bakerRoles.deleteRole);
 
   const [name, setName] = useState("");
-  const [selectedItemIds, setSelectedItemIds] = useState<Set<Id<"itemCatalog">>>(
-    new Set(),
-  );
+  const [selectedItemIds, setSelectedItemIds] = useState<
+    Set<Id<"itemCatalog">>
+  >(new Set());
   const [isCreating, setIsCreating] = useState(false);
   const [accordionValue, setAccordionValue] = useState<string[]>([]);
 
@@ -95,12 +101,12 @@ export default function BakerRolesPage() {
     }
   };
 
-  const Arrow = ({value}: {value: string}) => {
+  const Arrow = ({ value }: { value: string }) => {
     if (accordionValue.find((v) => v === value)) {
-      return <ChevronUp />
+      return <ChevronUp />;
     }
 
-    return <ChevronDown />
+    return <ChevronDown />;
   };
 
   if (!data) return <Loading />;
@@ -128,40 +134,64 @@ export default function BakerRolesPage() {
               <p className="text-sm text-muted-foreground">
                 Select the items this role is responsible for baking.
               </p>
-              <Accordion value={accordionValue as any} onValueChange={setAccordionValue}>
-              {data.catalog.map((entry) => {
-                const categoryItemIds = entry.items.map((item) => item._id);
-                const state = getCategoryState(categoryItemIds, selectedItemIds);
+              <Accordion
+                value={accordionValue as any}
+                onValueChange={setAccordionValue}
+              >
+                {data.catalog.map((entry) => {
+                  const categoryItemIds = entry.items.map((item) => item._id);
+                  const state = getCategoryState(
+                    categoryItemIds,
+                    selectedItemIds,
+                  );
 
-                return (
-                  <AccordionItem key={entry.category._id} value={entry.category._id} className="rounded-md border px-3 py-2">
-                    <div className="flex justify-between">
-                      <div className="flex items-center gap-2">
-                        <Checkbox state={state} onChange={(event) =>
-                            setCategoryChecked(categoryItemIds, event.target.checked)} />
-                        <span>{entry.category.name}</span>
-                      </div>
-                      <button type="button" className="cursor-pointer" onClick={() => toggleAccordion(entry.category._id)}>
-                        <Arrow value={entry.category._id} />
-                      </button>
-                    </div>
-
-                    <AccordionContent className="mt-3 ml-6 space-y-2">
-                      {entry.items.map((item) => (
-                        <label key={item._id} className="flex items-center gap-2">
+                  return (
+                    <AccordionItem
+                      key={entry.category._id}
+                      value={entry.category._id}
+                      className="rounded-md border px-3 py-2"
+                    >
+                      <div className="flex justify-between">
+                        <div className="flex items-center gap-2">
                           <Checkbox
-                            state={selectedItemIds.has(item._id)}
+                            state={state}
                             onChange={(event) =>
-                              setItemChecked(item._id, event.target.checked)
+                              setCategoryChecked(
+                                categoryItemIds,
+                                event.target.checked,
+                              )
                             }
                           />
-                          <span>{item.name}</span>
-                        </label>
-                      ))}
-                    </AccordionContent>
-                  </AccordionItem>
-                );
-              })}
+                          <span>{entry.category.name}</span>
+                        </div>
+                        <button
+                          type="button"
+                          className="cursor-pointer"
+                          onClick={() => toggleAccordion(entry.category._id)}
+                        >
+                          <Arrow value={entry.category._id} />
+                        </button>
+                      </div>
+
+                      <AccordionContent className="mt-3 ml-6 space-y-2">
+                        {entry.items.map((item) => (
+                          <label
+                            key={item._id}
+                            className="flex items-center gap-2"
+                          >
+                            <Checkbox
+                              state={selectedItemIds.has(item._id)}
+                              onChange={(event) =>
+                                setItemChecked(item._id, event.target.checked)
+                              }
+                            />
+                            <span>{item.name}</span>
+                          </label>
+                        ))}
+                      </AccordionContent>
+                    </AccordionItem>
+                  );
+                })}
               </Accordion>
             </div>
 
@@ -194,7 +224,10 @@ export default function BakerRolesPage() {
                   {role.itemIds.length === 1 ? "" : "s"}
                 </p>
               </div>
-              <Button variant="outline" onClick={() => void handleDeleteRole(role._id)}>
+              <Button
+                variant="outline"
+                onClick={() => void handleDeleteRole(role._id)}
+              >
                 Delete
               </Button>
             </div>

@@ -9,7 +9,9 @@
     "build": "tsc -b && vite build",
     "lint": "tsc && eslint .  --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "square-sandbox:create-items": "node --env-file=scripts/.env.local scripts/square-sandbox-setup.js create-items",
+    "square-sandbox:test-orders": "node --env-file=scripts/.env.local scripts/square-sandbox-setup.js test-orders"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

@@ -17,7 +17,13 @@ import {
 import type { AssignableUserRole } from "@/../shared/userRole";
 import { toast } from "sonner";
 import { toastError } from "@/lib/errors";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const inviteRoles: AssignableUserRole[] = ["admin", "employee", "client"];
 
@@ -54,7 +60,11 @@ export default function AdminAccessPage() {
     approve: boolean,
   ) => {
     await resolveInvitation({ invitationId, approve })
-      .then(() => toast.success(approve ? "Approved invitation." : "Declined invitation."))
+      .then(() =>
+        toast.success(
+          approve ? "Approved invitation." : "Declined invitation.",
+        ),
+      )
       .catch(toastError);
   };
 

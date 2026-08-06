@@ -18,6 +18,8 @@ import ItemCatalogPage from "./pages/itemCatalog";
 import PageNotFoundPage from "./pages/404";
 import WholesaleOrdersPage from "./pages/wholesaleOrders";
 import WholesaleOrderPage from "./pages/wholesaleOrder";
+import RetailOrdersPage from "./pages/retailOrders";
+import RetailOrderPage from "./pages/retailOrder";
 import LoginPage from "./pages/login";
 import SignupPage from "./pages/signup";
 import PendingAccessPage from "./pages/pendingAccess";
@@ -55,6 +57,16 @@ const authenticatedRoutes: {
   {
     path: "/wholesale-order/:id",
     element: <WholesaleOrderPage />,
+    allowedRoles: ["admin"] as const,
+  },
+  {
+    path: "/retail-orders",
+    element: <RetailOrdersPage />,
+    allowedRoles: ["admin"] as const,
+  },
+  {
+    path: "/retail-order/:id",
+    element: <RetailOrderPage />,
     allowedRoles: ["admin"] as const,
   },
   {
@@ -121,7 +133,7 @@ function AppRoutes() {
     );
   }
 
-  const defaultRoute = userRole.links[0]?.path ?? "/production";
+  const defaultRoute = "/production";
 
   return (
     <Layout userRole={userRole}>
@@ -132,12 +144,19 @@ function AppRoutes() {
         <Route path="/" element={<Navigate to={defaultRoute} replace />} />
 
         {authenticatedRoutes
-          .filter((route) => route.allowedRoles.includes(userRole.value as Exclude<UserRoleValue, "none">))
+          .filter((route) =>
+            route.allowedRoles.includes(
+              userRole.value as Exclude<UserRoleValue, "none">,
+            ),
+          )
           .map((route) => (
             <Route key={route.path} path={route.path} element={route.element} />
           ))}
-          
-        <Route path="*" element={<PageNotFoundPage links={[...userRole.links]} />} />
+
+        <Route
+          path="*"
+          element={<PageNotFoundPage links={[...userRole.links]} />}
+        />
       </Routes>
     </Layout>
   );

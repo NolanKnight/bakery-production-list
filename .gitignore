@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Local square testing data
+sandbox-item-mapping.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

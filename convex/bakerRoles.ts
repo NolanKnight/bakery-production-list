@@ -77,11 +77,15 @@ export const createRole = mutation({
 
     const existing = await ctx.db
       .query("bakerRoles")
-      .withIndex("by_normalizedName", (q) => q.eq("normalizedName", normalizedName))
+      .withIndex("by_normalizedName", (q) =>
+        q.eq("normalizedName", normalizedName),
+      )
       .unique();
 
     if (existing) {
-      throw new ConvexError({ message: "A baker role with this name already exists." });
+      throw new ConvexError({
+        message: "A baker role with this name already exists.",
+      });
     }
 
     const roleId = await ctx.db.insert("bakerRoles", {

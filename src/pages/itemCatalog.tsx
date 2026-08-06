@@ -1,22 +1,43 @@
-import { useQuery } from "convex/react";
+import { useAction, useQuery } from "convex/react";
 
 import { api } from "../../convex/_generated/api";
 
 import CatalogCategoryCard from "@/components/catalog/CatalogCategoryCard";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import NewCategoryCard from "@/components/catalog/newCategoryCard";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import UnitRow from "@/components/units/UnitRow";
 import NewUnitRow from "@/components/units/NewUnitRow";
 import Loading from "@/components/loading";
+import { toast } from "sonner";
+import { toastError } from "@/lib/errors";
 
 export default function ItemCatalogPage() {
   const catalog = useQuery(api.itemCatalog.getItems);
   const units = useQuery(api.units.getUnits);
+  const validateSquareItemConnections = useAction(
+    api.itemCatalog.validateSquareItemConnections,
+  );
+  const hasValidatedSquareConnections = useRef(false);
 
   const [addingCategory, setAddingCategory] = useState(false);
   const [addingUnit, setAddingUnit] = useState(false);
+
+  useEffect(() => {
+    if (!catalog || hasValidatedSquareConnections.current) return;
+    hasValidatedSquareConnections.current = true;
+
+    void validateSquareItemConnections({})
+      .then((result) => {
+        if (result.clearedItemCount > 0) {
+          toast.info(
+            `Removed ${result.clearedItemCount} invalid Square connection${result.clearedItemCount === 1 ? "" : "s"}.`,
+          );
+        }
+      })
+      .catch(toastError);
+  }, [catalog, validateSquareItemConnections]);
 
   if (!catalog) return <Loading />;
 

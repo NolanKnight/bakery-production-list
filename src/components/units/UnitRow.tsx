@@ -70,7 +70,7 @@ export default function CatalogItemRow({ unit }: Props) {
   return (
     <>
       <Separator />
-      <div className="grid grid-cols-3 items-center gap-4 py-2">
+      <div className="grid grid-cols-2 items-center gap-4 py-2">
         {/* Item Name */}
         {editing ? (
           <Input value={name} onChange={(e) => setName(e.target.value)} />
@@ -78,49 +78,55 @@ export default function CatalogItemRow({ unit }: Props) {
           <span>{unit.name}</span>
         )}
 
-        {/* Edit / Save */}
-        {editing ? (
-          <Button size="sm" onClick={handleSave}>
-            Save
-          </Button>
-        ) : (
-          <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
-            Edit
-          </Button>
-        )}
-
-        {/* Delete / Cancel */}
-        {editing ? (
-          <Button size="sm" variant="secondary" onClick={handleCancel}>
-            Cancel
-          </Button>
-        ) : (
-          <AlertDialog open={open} onOpenChange={setOpen}>
-            <AlertDialogTrigger
-              render={<Button size="sm" variant="destructive" />}
+        <div className="flex justify-end space-x-4">
+          {/* Edit / Save */}
+          {editing ? (
+            <Button size="sm" onClick={handleSave}>
+              Save
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setEditing(true)}
             >
-              Delete
-            </AlertDialogTrigger>
+              Edit
+            </Button>
+          )}
 
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete "{unit.name}"?</AlertDialogTitle>
+          {/* Delete / Cancel */}
+          {editing ? (
+            <Button size="sm" variant="secondary" onClick={handleCancel}>
+              Cancel
+            </Button>
+          ) : (
+            <AlertDialog open={open} onOpenChange={setOpen}>
+              <AlertDialogTrigger
+                render={<Button size="sm" variant="destructive" />}
+              >
+                Delete
+              </AlertDialogTrigger>
 
-                <AlertDialogDescription>
-                  This will delete the unit forever.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete "{unit.name}"?</AlertDialogTitle>
 
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogDescription>
+                    This will delete the unit forever.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
 
-                <AlertDialogAction onClick={handleDelete}>
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+                  <AlertDialogAction onClick={handleDelete}>
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       </div>
     </>
   );
