@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const inviteRoles: AssignableUserRole[] = ["admin", "employee", "client"];
+const inviteRoles: AssignableUserRole[] = ["employee", "client"];
 
 export default function AdminAccessPage() {
   const invitations = useQuery(api.auth.listInvitations, { status: "pending" });
