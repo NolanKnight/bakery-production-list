@@ -25,7 +25,7 @@ import {
 } from "@/lib/weekdayPar";
 
 export default function ParPage() {
-  const catalog = useQuery(api.itemCatalog.getItems);
+  const catalog = useQuery(api.itemCatalog.getItems, {});
   const units = useQuery(api.units.getUnits);
 
   const updatePar = useMutation(api.itemCatalog.updateItemPar);

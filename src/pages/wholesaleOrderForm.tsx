@@ -14,7 +14,7 @@ import Loading from "@/components/loading";
 type OrderValues = { itemId: Id<"itemCatalog">; quantity: number }[];
 
 export default function WholesaleOrderForm() {
-  const catalog = useQuery(api.itemCatalog.getItems);
+  const catalog = useQuery(api.itemCatalog.getItems, {});
   const units = useQuery(api.units.getUnits);
 
   const [clientName, setClientName] = useState("");

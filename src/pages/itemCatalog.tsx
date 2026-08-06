@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { toastError } from "@/lib/errors";
 
 export default function ItemCatalogPage() {
-  const catalog = useQuery(api.itemCatalog.getItems);
+  const catalog = useQuery(api.itemCatalog.getItems, {});
   const units = useQuery(api.units.getUnits);
   const validateSquareItemConnections = useAction(
     api.itemCatalog.validateSquareItemConnections,

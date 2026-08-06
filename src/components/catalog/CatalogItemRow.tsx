@@ -36,6 +36,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "../ui/input-group";
+import { toast } from "sonner";
 
 type Props = {
   item: Doc<"itemCatalog">;
@@ -117,7 +118,9 @@ export default function CatalogItemRow({ item }: Props) {
       id: item._id,
       name: name.trim(),
       unitId: unitId,
-    }).catch(toastError);
+    })
+      .then(() => toast.success(`Successfully updated ${name.trim()}.`))
+      .catch(toastError);
 
     setEditing(false);
   };

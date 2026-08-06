@@ -10,7 +10,7 @@ import Loading from "@/components/loading";
 import { toast } from "sonner";
 
 export default function InventoryPage() {
-  const catalog = useQuery(api.itemCatalog.getItems);
+  const catalog = useQuery(api.itemCatalog.getItems, {});
   const units = useQuery(api.units.getUnits);
   const updateInventory = useMutation(api.itemCatalog.updateItemInventory);
 
