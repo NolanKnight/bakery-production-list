@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "convex/react";
 import { Link, useParams } from "react-router-dom";
-import { Id } from "convex/_generated/dataModel";
+import { Id } from "../../convex/_generated/dataModel";
 
 import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
