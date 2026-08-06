@@ -24,7 +24,7 @@ export const addCategory = mutation({
         ? 0
         : Math.max(...existing.map((item) => item.sortOrder)) + 1;
 
-    await ctx.db.insert("units", {
+    await ctx.db.insert("categories", {
       name: args.name.trim(),
       sortOrder,
     });
