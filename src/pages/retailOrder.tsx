@@ -29,7 +29,10 @@ export default function RetailOrderPage() {
   const units = useQuery(api.units.getUnits);
 
   const itemLookup = useMemo(() => {
-    const lookup = new Map<Id<"itemCatalog">, { name: string; unitName: string }>();
+    const lookup = new Map<
+      Id<"itemCatalog">,
+      { name: string; unitName: string }
+    >();
     if (!catalog || !units) return lookup;
 
     const unitNameById = new Map(units.map((unit) => [unit._id, unit.name]));
@@ -61,7 +64,10 @@ export default function RetailOrderPage() {
       <div className="flex flex-col items-start">
         <Link
           to="/retail-orders"
-          className={cn(buttonVariants({ variant: "link", size: "lg" }), "px-0")}
+          className={cn(
+            buttonVariants({ variant: "link", size: "lg" }),
+            "px-0",
+          )}
         >
           <MoveLeft />
           Back to orders
@@ -83,7 +89,8 @@ export default function RetailOrderPage() {
             {order.customer.phone ?? "No phone provided"}
           </p>
           <p>
-            <span className="font-medium">Desired Date:</span> {order.desiredDate}
+            <span className="font-medium">Desired Date:</span>{" "}
+            {order.desiredDate}
           </p>
           <p>
             <span className="font-medium">Source:</span>{" "}
@@ -110,7 +117,9 @@ export default function RetailOrderPage() {
               <TableBody>
                 {order.items.map((item, index) => {
                   const details = itemLookup.get(item.itemId);
-                  const unitName = details?.unitName ? ` ${details.unitName}` : "";
+                  const unitName = details?.unitName
+                    ? ` ${details.unitName}`
+                    : "";
 
                   return (
                     <TableRow key={`${item.itemId}-${index}`}>

@@ -36,11 +36,11 @@ export default class UserRole {
     BakerRoles,
     Account,
   ]);
-  public static readonly Employee: UserRole = new UserRole("employee", "Employee", [
-    Inventory,
-    Production,
-    Account,
-  ]);
+  public static readonly Employee: UserRole = new UserRole(
+    "employee",
+    "Employee",
+    [Inventory, Production, Account],
+  );
   public static readonly Client: UserRole = new UserRole("client", "Client", [
     WholesaleForm,
     Account,

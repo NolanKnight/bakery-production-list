@@ -79,50 +79,54 @@ export default function CatalogItemRow({ unit }: Props) {
         )}
 
         <div className="flex justify-end space-x-4">
-        {/* Edit / Save */}
-        {editing ? (
-          <Button size="sm" onClick={handleSave}>
-            Save
-          </Button>
-        ) : (
-          <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
-            Edit
-          </Button>
-        )}
-
-        {/* Delete / Cancel */}
-        {editing ? (
-          <Button size="sm" variant="secondary" onClick={handleCancel}>
-            Cancel
-          </Button>
-        ) : (
-          <AlertDialog open={open} onOpenChange={setOpen}>
-            <AlertDialogTrigger
-              render={<Button size="sm" variant="destructive" />}
+          {/* Edit / Save */}
+          {editing ? (
+            <Button size="sm" onClick={handleSave}>
+              Save
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setEditing(true)}
             >
-              Delete
-            </AlertDialogTrigger>
+              Edit
+            </Button>
+          )}
 
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete "{unit.name}"?</AlertDialogTitle>
+          {/* Delete / Cancel */}
+          {editing ? (
+            <Button size="sm" variant="secondary" onClick={handleCancel}>
+              Cancel
+            </Button>
+          ) : (
+            <AlertDialog open={open} onOpenChange={setOpen}>
+              <AlertDialogTrigger
+                render={<Button size="sm" variant="destructive" />}
+              >
+                Delete
+              </AlertDialogTrigger>
 
-                <AlertDialogDescription>
-                  This will delete the unit forever.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete "{unit.name}"?</AlertDialogTitle>
 
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogDescription>
+                    This will delete the unit forever.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
 
-                <AlertDialogAction onClick={handleDelete}>
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
-      </div>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+                  <AlertDialogAction onClick={handleDelete}>
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       </div>
     </>
   );

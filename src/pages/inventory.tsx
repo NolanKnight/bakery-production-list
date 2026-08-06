@@ -82,7 +82,11 @@ export default function InventoryPage() {
                   min={0}
                   value={catalogInventory.get(item._id)}
                   onChange={(e) =>
-                    updateCatalogInventory(catalogInventory, item, e.target.value)
+                    updateCatalogInventory(
+                      catalogInventory,
+                      item,
+                      e.target.value,
+                    )
                   }
                   onBlur={(e) => {
                     updateInventory({

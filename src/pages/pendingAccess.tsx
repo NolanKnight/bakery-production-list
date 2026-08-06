@@ -9,7 +9,13 @@ import { Input } from "@/components/ui/input";
 import type { AssignableUserRole } from "@/../shared/userRole";
 import { toast } from "sonner";
 import { toastError } from "@/lib/errors";
-import { Select, SelectContent, SelectTrigger, SelectValue, SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+  SelectItem,
+} from "@/components/ui/select";
 
 const requestableRoles: AssignableUserRole[] = ["client", "employee", "admin"];
 
@@ -79,7 +85,12 @@ export default function PendingAccessPage() {
           <form onSubmit={handleRequest} className="space-y-4">
             <Field>
               <FieldLabel htmlFor="requested-role">Requested role</FieldLabel>
-              <Select value={desiredRole} onValueChange={(role) => { if (role) setDesiredRole(role); }}>
+              <Select
+                value={desiredRole}
+                onValueChange={(role) => {
+                  if (role) setDesiredRole(role);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

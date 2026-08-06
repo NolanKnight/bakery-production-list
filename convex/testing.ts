@@ -42,7 +42,7 @@ export const syncSquareVariationId = action({
     if (!isSandbox) {
       throw new Error(
         "syncSquareVariationId can only run in dev environment (sandbox). " +
-          "Do not use this action in production."
+          "Do not use this action in production.",
       );
     }
 
@@ -65,13 +65,13 @@ export const simulateSquareWebhook = action({
     orderId: v.string(),
     sourceType: v.union(
       v.literal("ONLINE_ORDER_CREATED"),
-      v.literal("POS_ORDER_CREATED")
+      v.literal("POS_ORDER_CREATED"),
     ),
     lineItems: v.array(
       v.object({
         catalogObjectId: v.string(), // Square variation ID
         quantity: v.number(),
-      })
+      }),
     ),
     customerName: v.optional(v.string()),
     customerEmail: v.optional(v.string()),
@@ -83,7 +83,7 @@ export const simulateSquareWebhook = action({
     if (!isSandbox) {
       throw new Error(
         "simulateSquareWebhook can only run in dev environment. " +
-          "Do not use this action in production."
+          "Do not use this action in production.",
       );
     }
 

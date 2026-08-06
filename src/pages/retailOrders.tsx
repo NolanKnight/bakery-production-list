@@ -42,7 +42,9 @@ export default function RetailOrdersPage() {
                     void navigate(`/retail-order/${order._id}`);
                   }}
                 >
-                  <TableCell>{order.customer.name ?? "Unknown customer"}</TableCell>
+                  <TableCell>
+                    {order.customer.name ?? "Unknown customer"}
+                  </TableCell>
                   <TableCell>{order.desiredDate}</TableCell>
                   <TableCell>{order.sourceName ?? "Unknown source"}</TableCell>
                   <TableCell className="text-right">

@@ -56,14 +56,14 @@ function validateEnvironment() {
   const token = process.env.SQUARE_ACCESS_TOKEN;
   if (!token) {
     error(
-      "SQUARE_ACCESS_TOKEN is not set. Set it to your sandbox token in .env.local"
+      "SQUARE_ACCESS_TOKEN is not set. Set it to your sandbox token in .env.local",
     );
   }
 
   const env = process.env.SQUARE_ENVIRONMENT || "SANDBOX";
   if (env !== "SANDBOX") {
     error(
-      `SQUARE_ENVIRONMENT is '${env}', not 'SANDBOX'. This script only works with sandbox credentials.`
+      `SQUARE_ENVIRONMENT is '${env}', not 'SANDBOX'. This script only works with sandbox credentials.`,
     );
   }
 
@@ -148,17 +148,21 @@ async function createSquareItem(name, description, variations) {
 
   try {
     console.log("try");
-    const response = await squareRequest("POST", "/catalog/object", itemData).then((result) => {
+    const response = await squareRequest(
+      "POST",
+      "/catalog/object",
+      itemData,
+    ).then((result) => {
       console.log("posted date");
       console.log("result: ", result);
-      
+
       return result;
     });
     const catalogObjectId = response.catalog_object.id;
-    console.log("found id")
+    console.log("found id");
     console.log("id: ", catalogObjectId);
     const variationIds = response.catalog_object.item_data.variations.map(
-      (v) => v.id
+      (v) => v.id,
     );
 
     console.log("found variation ids");
@@ -180,9 +184,7 @@ async function createSquareItem(name, description, variations) {
 
 // Create a test order in Square
 async function createTestOrder(orderId, lineItems, customerName) {
-  info(
-    `Creating test order: ${orderId})`
-  );
+  info(`Creating test order: ${orderId})`);
 
   // const source =
   //   sourceType === "ONLINE"
@@ -280,7 +282,7 @@ async function createItemsFlow() {
     const created = await createSquareItem(
       item.name,
       item.description,
-      item.variations
+      item.variations,
     );
     if (created) {
       createdItems.push(created);
@@ -290,11 +292,14 @@ async function createItemsFlow() {
 
   log("\n📋 Summary:", "blue");
   log(
-    `Created ${createdItems.length} items with ${createdItems.reduce((sum, item) => sum + item.variationIds.length, 0)} total variations\n`
+    `Created ${createdItems.length} items with ${createdItems.reduce((sum, item) => sum + item.variationIds.length, 0)} total variations\n`,
   );
 
   // Save mapping for webhook testing
-  const mappingFile = path.join(import.meta.dirname, "../sandbox-item-mapping.json");
+  const mappingFile = path.join(
+    import.meta.dirname,
+    "../sandbox-item-mapping.json",
+  );
   fs.writeFileSync(mappingFile, JSON.stringify(createdItems, null, 2));
   info(`Item mapping saved to: ${mappingFile}`);
 
@@ -307,10 +312,13 @@ async function testOrdersFlow() {
   log("\n🛒 Creating test orders...\n", "blue");
 
   // Load mapping from previous step
-  const mappingFile = path.join(import.meta.dirname, "../sandbox-item-mapping.json");
+  const mappingFile = path.join(
+    import.meta.dirname,
+    "../sandbox-item-mapping.json",
+  );
   if (!fs.existsSync(mappingFile)) {
     error(
-      `Item mapping file not found. Run 'npm run square-sandbox create-items' first.`
+      `Item mapping file not found. Run 'npm run square-sandbox create-items' first.`,
     );
   }
 
@@ -333,7 +341,7 @@ async function testOrdersFlow() {
         quantity: 2,
       },
     ],
-    "Test Online Customer"
+    "Test Online Customer",
   );
 
   // log("\nTest 2: In-person order (should be IGNORED by webhook)\n", "yellow");
@@ -365,7 +373,7 @@ async function webhookTestFlow() {
   log("3. Go to Event subscriptions");
   log("4. Use the Test Event button to send mock events");
   log(
-    "5. Check your server logs at https://dashboard.convex.dev for webhook execution\n"
+    "5. Check your server logs at https://dashboard.convex.dev for webhook execution\n",
   );
 }
 
@@ -374,12 +382,14 @@ function showHelp() {
   log("Usage: node scripts/square-sandbox-setup.js <command>\n", "gray");
   log("Commands:", "blue");
   log(
-    "  create-items   Create catalog items in Square sandbox with variations"
+    "  create-items   Create catalog items in Square sandbox with variations",
   );
   log("  test-orders    Create test orders (online and in-person)");
   log("  webhook-test   Show webhook testing instructions\n");
   log("Example:", "blue");
-  log("  SQUARE_ENVIRONMENT=SANDBOX node scripts/square-sandbox-setup.js create-items\n");
+  log(
+    "  SQUARE_ENVIRONMENT=SANDBOX node scripts/square-sandbox-setup.js create-items\n",
+  );
 }
 
 // Run

@@ -68,8 +68,16 @@ export default defineSchema({
     .index("by_square_order_id", ["squareOrderId"]),
   accessInvitations: defineTable({
     email: v.string(),
-    role: v.union(v.literal("admin"), v.literal("employee"), v.literal("client")),
-    status: v.union(v.literal("pending"), v.literal("accepted"), v.literal("declined")),
+    role: v.union(
+      v.literal("admin"),
+      v.literal("employee"),
+      v.literal("client"),
+    ),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("accepted"),
+      v.literal("declined"),
+    ),
     source: v.union(v.literal("invite"), v.literal("request")),
     note: v.optional(v.string()),
     requestedByAuthUserId: v.optional(v.string()),

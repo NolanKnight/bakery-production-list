@@ -15,17 +15,18 @@ export default function LoginPage() {
   const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
-    
-    await authClient.signIn.email({
+
+    await authClient.signIn
+      .email({
         email: email.trim(),
         password,
-      }).then((result) => {
-      if (result.error) {
-        toast.error(result.error.message ?? "Failed to sign in.");
-      }
-    }).finally(() =>
-      setIsSubmitting(false)
-)
+      })
+      .then((result) => {
+        if (result.error) {
+          toast.error(result.error.message ?? "Failed to sign in.");
+        }
+      })
+      .finally(() => setIsSubmitting(false));
   };
 
   return (

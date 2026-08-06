@@ -30,7 +30,10 @@ export default function WholesaleOrderPage() {
   const units = useQuery(api.units.getUnits);
 
   const itemLookup = useMemo(() => {
-    const lookup = new Map<Id<"itemCatalog">, { name: string; unitName: string }>();
+    const lookup = new Map<
+      Id<"itemCatalog">,
+      { name: string; unitName: string }
+    >();
 
     if (!catalog || !units) return lookup;
 
@@ -62,7 +65,13 @@ export default function WholesaleOrderPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
       <div className="flex flex-col items-start">
-        <Link to="/wholesale-orders" className={cn(buttonVariants({ variant: "link", size: "lg" }), "px-0")}>
+        <Link
+          to="/wholesale-orders"
+          className={cn(
+            buttonVariants({ variant: "link", size: "lg" }),
+            "px-0",
+          )}
+        >
           <MoveLeft />
           Back to orders
         </Link>
@@ -78,7 +87,8 @@ export default function WholesaleOrderPage() {
             <span className="font-medium">Email:</span> {order.email}
           </p>
           <p>
-            <span className="font-medium">Desired Date:</span> {order.desiredDate}
+            <span className="font-medium">Desired Date:</span>{" "}
+            {order.desiredDate}
           </p>
           <p>
             <span className="font-medium">Submitted:</span>{" "}
@@ -93,36 +103,36 @@ export default function WholesaleOrderPage() {
         </CardHeader>
 
         <CardContent>
-          {(
-            order.items.length > 0 ?
-          
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Item</TableHead>
-                <TableHead className="text-right">Quantity</TableHead>
-              </TableRow>
-            </TableHeader>
+          {order.items.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Item</TableHead>
+                  <TableHead className="text-right">Quantity</TableHead>
+                </TableRow>
+              </TableHeader>
 
-            <TableBody>
-              {order.items.map((item) => {
-                const details = itemLookup.get(item.itemId);
-                const unitName = details?.unitName ? ` ${details.unitName}` : "";
+              <TableBody>
+                {order.items.map((item) => {
+                  const details = itemLookup.get(item.itemId);
+                  const unitName = details?.unitName
+                    ? ` ${details.unitName}`
+                    : "";
 
-                return (
-                  <TableRow key={item.itemId}>
-                    <TableCell>{details?.name ?? item.itemId}</TableCell>
-                    <TableCell className="text-right">
-                      {item.quantity}
-                      {unitName}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-          :
-        <p className="text-muted-foreground">No items ordered.</p>
+                  return (
+                    <TableRow key={item.itemId}>
+                      <TableCell>{details?.name ?? item.itemId}</TableCell>
+                      <TableCell className="text-right">
+                        {item.quantity}
+                        {unitName}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          ) : (
+            <p className="text-muted-foreground">No items ordered.</p>
           )}
         </CardContent>
       </Card>

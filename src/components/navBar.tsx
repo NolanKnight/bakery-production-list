@@ -1,6 +1,14 @@
 import UserRole from "@/../shared/userRole";
 import { Navigation, isLink } from "../../shared/links";
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "./ui/navigation-menu";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "./ui/navigation-menu";
 
 export default function NavBar({ userRole }: { userRole: UserRole }) {
   return (
@@ -13,25 +21,35 @@ export default function NavBar({ userRole }: { userRole: UserRole }) {
 
               return (
                 <NavigationMenuItem>
-                  <NavigationMenuLink href={item.path} className={navigationMenuTriggerStyle()}>
+                  <NavigationMenuLink
+                    href={item.path}
+                    className={navigationMenuTriggerStyle()}
+                  >
                     {item.name}
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               );
             }
 
-            if (item.links.every((link) => !userRole.links.includes(link))) return;
+            if (item.links.every((link) => !userRole.links.includes(link)))
+              return;
 
             return (
               <NavigationMenuItem>
                 <NavigationMenuTrigger>{item.name}</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   {item.links.map((link) => {
-                  if (!userRole.links.includes(link)) return;
-                  
-                  return <NavigationMenuLink href={link.path} className={navigationMenuTriggerStyle()}>
-                    {link.name}
-                  </NavigationMenuLink>})}
+                    if (!userRole.links.includes(link)) return;
+
+                    return (
+                      <NavigationMenuLink
+                        href={link.path}
+                        className={navigationMenuTriggerStyle()}
+                      >
+                        {link.name}
+                      </NavigationMenuLink>
+                    );
+                  })}
                 </NavigationMenuContent>
               </NavigationMenuItem>
             );

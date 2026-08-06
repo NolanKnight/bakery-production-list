@@ -24,17 +24,20 @@ export default function SignupPage() {
 
     setIsSubmitting(true);
 
-    await authClient.signUp.email({
-      name: name.trim(),
-      email: email.trim(),
-      password,
-    }).then((result) => {
-      if (result.error) {
-        toast.error(result.error.message ?? "Failed to sign in.");
-      }
-    }).finally(() => {
-      setIsSubmitting(false);
-    });
+    await authClient.signUp
+      .email({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+      })
+      .then((result) => {
+        if (result.error) {
+          toast.error(result.error.message ?? "Failed to sign in.");
+        }
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   return (
@@ -78,7 +81,9 @@ export default function SignupPage() {
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
+              <FieldLabel htmlFor="confirm-password">
+                Confirm Password
+              </FieldLabel>
               <Input
                 id="confirm-password"
                 type="password"

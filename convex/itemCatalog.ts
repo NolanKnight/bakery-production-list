@@ -65,7 +65,9 @@ const listSquareCatalogItems = async (
 
     const payload: unknown = await response.json();
     if (!isRecord(payload)) {
-      throw new ConvexError({ message: "Invalid Square catalog response shape." });
+      throw new ConvexError({
+        message: "Invalid Square catalog response shape.",
+      });
     }
 
     const objects = Array.isArray(payload.objects) ? payload.objects : [];
@@ -275,8 +277,13 @@ export const validateSquareItemConnections = action({
       throw new ConvexError({ message: "Unauthorized" });
     }
 
-    const connectedItems: { id: Doc<"itemCatalog">["_id"]; squareItemId: string }[] =
-      await ctx.runQuery(internal.itemCatalog.getConnectedSquareItemLinks, {});
+    const connectedItems: {
+      id: Doc<"itemCatalog">["_id"];
+      squareItemId: string;
+    }[] = await ctx.runQuery(
+      internal.itemCatalog.getConnectedSquareItemLinks,
+      {},
+    );
     if (connectedItems.length === 0) {
       return {
         connectedItemCount: 0,
@@ -286,7 +293,9 @@ export const validateSquareItemConnections = action({
 
     const squareAccessToken = process.env.SQUARE_ACCESS_TOKEN;
     if (!squareAccessToken) {
-      throw new ConvexError({ message: "SQUARE_ACCESS_TOKEN is not configured" });
+      throw new ConvexError({
+        message: "SQUARE_ACCESS_TOKEN is not configured",
+      });
     }
 
     const validSquareIds = new Set(
@@ -322,7 +331,9 @@ export const getSquareCatalogItems = action({
 
     const squareAccessToken = process.env.SQUARE_ACCESS_TOKEN;
     if (!squareAccessToken) {
-      throw new ConvexError({ message: "SQUARE_ACCESS_TOKEN is not configured" });
+      throw new ConvexError({
+        message: "SQUARE_ACCESS_TOKEN is not configured",
+      });
     }
 
     return (await listSquareCatalogItems(squareAccessToken)).sort((a, b) =>

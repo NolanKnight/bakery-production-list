@@ -31,7 +31,11 @@ import { Separator } from "../ui/separator";
 import { toastError } from "@/lib/errors";
 import { CircleCheck, CircleX, SearchIcon } from "lucide-react";
 import { Table, TableRow } from "../ui/table";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "../ui/input-group";
 
 type Props = {
   item: Doc<"itemCatalog">;
@@ -54,15 +58,23 @@ export default function CatalogItemRow({ item }: Props) {
   const units = useQuery(api.units.getUnits);
   const updateItem = useMutation(api.itemCatalog.updateItem);
   const deleteItem = useMutation(api.itemCatalog.deleteItem);
-  const setSquareItemConnection = useMutation(api.itemCatalog.setSquareItemConnection);
-  const getSquareCatalogItems = useAction(api.itemCatalog.getSquareCatalogItems);
+  const setSquareItemConnection = useMutation(
+    api.itemCatalog.setSquareItemConnection,
+  );
+  const getSquareCatalogItems = useAction(
+    api.itemCatalog.getSquareCatalogItems,
+  );
 
   const [editing, setEditing] = useState(false);
   const [open, setOpen] = useState(false);
   const [squareDialogOpen, setSquareDialogOpen] = useState(false);
   const [loadingSquareItems, setLoadingSquareItems] = useState(false);
-  const [connectingSquareItemId, setConnectingSquareItemId] = useState<string | null>(null);
-  const [squareCatalogItems, setSquareCatalogItems] = useState<SquareCatalogItem[]>([]);
+  const [connectingSquareItemId, setConnectingSquareItemId] = useState<
+    string | null
+  >(null);
+  const [squareCatalogItems, setSquareCatalogItems] = useState<
+    SquareCatalogItem[]
+  >([]);
   const [squareItemsQuery, setSquareItemsQuery] = useState("");
 
   const [name, setName] = useState(item.name);
@@ -215,74 +227,86 @@ export default function CatalogItemRow({ item }: Props) {
               void handleEditSquareConnection();
             }}
           >
-            {item.squareItemId
-              ? "Edit Square Connection"
-              : "Connect to Square"}
+            {item.squareItemId ? "Edit Square Connection" : "Connect to Square"}
           </Button>
         ) : (
           <div className="space-x-2 flex items-center">
-          {(item.squareItemId ? <CircleCheck className="text-primary/50" size="20" /> : <CircleX className="text-destructive/50" size="20" />)}
-          <span className={item.squareItemId ? "text-muted-foreground" : "text-muted-foreground"}>
-            {item.squareItemId ? "Connected to Square" : "Not connected"}
-          </span>
+            {item.squareItemId ? (
+              <CircleCheck className="text-primary/50" size="20" />
+            ) : (
+              <CircleX className="text-destructive/50" size="20" />
+            )}
+            <span
+              className={
+                item.squareItemId
+                  ? "text-muted-foreground"
+                  : "text-muted-foreground"
+              }
+            >
+              {item.squareItemId ? "Connected to Square" : "Not connected"}
+            </span>
           </div>
         )}
 
         {/* Edit / Save */}
         <div className="flex space-x-4 items-center justify-self-end">
-        {editing ? (
-          <Button
-            size="sm"
-            onClick={() => {
-              void handleSave();
-            }}
-          >
-            Save
-          </Button>
-        ) : (
-          <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
-            Edit
-          </Button>
-        )}
-
-        {/* Delete / Cancel */}
-        {editing ? (
-          <Button size="sm" variant="secondary" onClick={handleCancel}>
-            Cancel
-          </Button>
-        ) : (
-          <AlertDialog open={open} onOpenChange={setOpen}>
-            <AlertDialogTrigger
-              render={<Button size="sm" variant="destructive" />}
+          {editing ? (
+            <Button
+              size="sm"
+              onClick={() => {
+                void handleSave();
+              }}
             >
-              Delete
-            </AlertDialogTrigger>
+              Save
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setEditing(true)}
+            >
+              Edit
+            </Button>
+          )}
 
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete "{item.name}"?</AlertDialogTitle>
+          {/* Delete / Cancel */}
+          {editing ? (
+            <Button size="sm" variant="secondary" onClick={handleCancel}>
+              Cancel
+            </Button>
+          ) : (
+            <AlertDialog open={open} onOpenChange={setOpen}>
+              <AlertDialogTrigger
+                render={<Button size="sm" variant="destructive" />}
+              >
+                Delete
+              </AlertDialogTrigger>
 
-                <AlertDialogDescription>
-                  This will remove the item from the catalog. The item will
-                  still be listed in wholesale and retail orders.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete "{item.name}"?</AlertDialogTitle>
 
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogDescription>
+                    This will remove the item from the catalog. The item will
+                    still be listed in wholesale and retail orders.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
 
-                <AlertDialogAction
-                  onClick={() => {
-                    void handleDelete();
-                  }}
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
-      </div>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+                  <AlertDialogAction
+                    onClick={() => {
+                      void handleDelete();
+                    }}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       </div>
 
       <AlertDialog open={squareDialogOpen} onOpenChange={setSquareDialogOpen}>
@@ -309,53 +333,57 @@ export default function CatalogItemRow({ item }: Props) {
             </div>
 
             <InputGroup>
-              <InputGroupInput placeholder="Search..." value={squareItemsQuery} onChange={(e) => setSquareItemsQuery(e.target.value)} />
+              <InputGroupInput
+                placeholder="Search..."
+                value={squareItemsQuery}
+                onChange={(e) => setSquareItemsQuery(e.target.value)}
+              />
               <InputGroupAddon>
                 <SearchIcon />
               </InputGroupAddon>
             </InputGroup>
 
             <div className="max-h-[50vh] overflow-y-auto space-y-4">
-            <Table>
-              {displayedSquareItems.map((squareItem) => {
-                const isSelected = squareItem.id === item.squareItemId;
-                return (
-                <TableRow key={squareItem.id}>
-                  <button
-                    type="button"
-                    className="w-full text-left space-y-1 p-3 disabled:opacity-50 cursor-pointer"
-                    disabled={connectingSquareItemId !== null}
-                    onClick={() => {
-                      void toggleSquareSelection(squareItem.id);
-                    }}
-                  >
-                    <p className="font-medium flex items-center gap-2">
-                      {squareItem.name}
-                      {isSelected && (
-                        <span className="text-xs rounded bg-primary/10 text-primary px-2 py-0.5">
-                          Currently selected
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {descriptionSnippet(squareItem.description)}
-                    </p>
-                    {isSelected && (
-                      <p className="text-xs text-muted-foreground">
-                        Click again to unselect.
-                      </p>
-                    )}
-                  </button>
-                </TableRow>
-                );
-              })}
+              <Table>
+                {displayedSquareItems.map((squareItem) => {
+                  const isSelected = squareItem.id === item.squareItemId;
+                  return (
+                    <TableRow key={squareItem.id}>
+                      <button
+                        type="button"
+                        className="w-full text-left space-y-1 p-3 disabled:opacity-50 cursor-pointer"
+                        disabled={connectingSquareItemId !== null}
+                        onClick={() => {
+                          void toggleSquareSelection(squareItem.id);
+                        }}
+                      >
+                        <p className="font-medium flex items-center gap-2">
+                          {squareItem.name}
+                          {isSelected && (
+                            <span className="text-xs rounded bg-primary/10 text-primary px-2 py-0.5">
+                              Currently selected
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {descriptionSnippet(squareItem.description)}
+                        </p>
+                        {isSelected && (
+                          <p className="text-xs text-muted-foreground">
+                            Click again to unselect.
+                          </p>
+                        )}
+                      </button>
+                    </TableRow>
+                  );
+                })}
 
-              {!loadingSquareItems && displayedSquareItems.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  No Square items found.
-                </p>
-              )}
-            </Table>
+                {!loadingSquareItems && displayedSquareItems.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No Square items found.
+                  </p>
+                )}
+              </Table>
             </div>
           </div>
 

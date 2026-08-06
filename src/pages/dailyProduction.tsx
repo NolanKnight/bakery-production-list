@@ -26,7 +26,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import Loading from "@/components/loading";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function DailyProductionPage() {
   const none = { name: "None (all items)" };
@@ -62,7 +68,9 @@ export default function DailyProductionPage() {
 
   const getOverride = (itemId: Id<"itemCatalog">) => {
     if (!overrides) return null;
-    return overrides.find((o) => o.itemId === itemId && o.date === date) ?? null;
+    return (
+      overrides.find((o) => o.itemId === itemId && o.date === date) ?? null
+    );
   };
 
   const handlePrint = () => {
@@ -74,14 +82,16 @@ export default function DailyProductionPage() {
   };
 
   const effectiveSelectedBakerRole =
-    selectedBakerRole === none || bakerRoles?.some((role) => role === selectedBakerRole)
+    selectedBakerRole === none ||
+    bakerRoles?.some((role) => role === selectedBakerRole)
       ? selectedBakerRole
       : none;
 
   const selectedRole =
     effectiveSelectedBakerRole === none
       ? null
-      : bakerRoles?.find((role) => role === effectiveSelectedBakerRole) ?? null;
+      : (bakerRoles?.find((role) => role === effectiveSelectedBakerRole) ??
+        null);
 
   const selectedRoleItemIds = useMemo(
     () => (selectedRole ? new Set(selectedRole.itemIds) : null),
@@ -95,7 +105,9 @@ export default function DailyProductionPage() {
     return data
       .map((entry) => ({
         ...entry,
-        items: entry.items.filter((item) => selectedRoleItemIds.has(item.itemId)),
+        items: entry.items.filter((item) =>
+          selectedRoleItemIds.has(item.itemId),
+        ),
       }))
       .filter((entry) => entry.items.length > 0);
   }, [data, selectedRoleItemIds]);
@@ -118,7 +130,13 @@ export default function DailyProductionPage() {
               />
               <div className="flex items-center gap-2">
                 <span className="font-medium">Baker role:</span>
-                <Select value={effectiveSelectedBakerRole} itemToStringLabel={(item) => item.name} onValueChange={(v) => { if (v) setSelectedBakerRole(v) }}>
+                <Select
+                  value={effectiveSelectedBakerRole}
+                  itemToStringLabel={(item) => item.name}
+                  onValueChange={(v) => {
+                    if (v) setSelectedBakerRole(v);
+                  }}
+                >
                   <SelectTrigger className="w-52">
                     <SelectValue placeholder={none.name} />
                   </SelectTrigger>
@@ -172,7 +190,10 @@ export default function DailyProductionPage() {
               </TableHeader>
               <TableBody>
                 {entry.items.map((item) => (
-                  <TableRow key={item.itemId} className="print:break-inside-avoid">
+                  <TableRow
+                    key={item.itemId}
+                    className="print:break-inside-avoid"
+                  >
                     <TableCell className="uppercase font-light text-left">
                       {item.name}
                     </TableCell>

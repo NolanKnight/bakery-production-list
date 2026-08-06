@@ -3,7 +3,10 @@ import { ConvexError, v } from "convex/values";
 import { getCatalog } from "./itemCatalog";
 import { Id } from "./_generated/dataModel";
 import { requireRole } from "./authorization";
-import { getWeekdayNameFromDate, normalizeWeekdayParValues } from "./weekdayPar";
+import {
+  getWeekdayNameFromDate,
+  normalizeWeekdayParValues,
+} from "./weekdayPar";
 
 export const getDailyProduction = query({
   args: {

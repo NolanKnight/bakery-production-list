@@ -42,7 +42,9 @@ export default function WholesaleOrderForm() {
       items: orders.filter((order) => order.quantity > 0),
     };
 
-    await createWholesaleOrder(order).then(() => toast.success("Successfully submitted order.")).catch(toastError);
+    await createWholesaleOrder(order)
+      .then(() => toast.success("Successfully submitted order."))
+      .catch(toastError);
 
     // optional reset
     setClientName("");
@@ -60,7 +62,7 @@ export default function WholesaleOrderForm() {
 
     return 0;
   };
-  
+
   const getUnit = (id: Id<"units">) => {
     if (!units) return;
 
@@ -80,7 +82,7 @@ export default function WholesaleOrderForm() {
         <CardContent className="space-y-4">
           {/* Client Info */}
           <div className="grid gap-4">
-            <Field> 
+            <Field>
               <FieldLabel htmlFor="client-name">Client Name</FieldLabel>
               <Input
                 id="client-name"
@@ -89,7 +91,7 @@ export default function WholesaleOrderForm() {
                 onChange={(e) => setClientName(e.target.value)}
               />
             </Field>
-            <Field> 
+            <Field>
               <FieldLabel htmlFor="client-email">Client Email</FieldLabel>
               <Input
                 id="client-email"
@@ -98,9 +100,11 @@ export default function WholesaleOrderForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <FieldDescription>Email address to receieve the receipt.</FieldDescription>
+              <FieldDescription>
+                Email address to receieve the receipt.
+              </FieldDescription>
             </Field>
-            <Field> 
+            <Field>
               <FieldLabel htmlFor="desired-date">Desired Date</FieldLabel>
               <Input
                 id="desired-date"
@@ -108,40 +112,44 @@ export default function WholesaleOrderForm() {
                 value={desiredDate}
                 onChange={(e) => setDesiredDate(e.target.value)}
               />
-              <FieldDescription>The date that the order is desired to be picked up on.</FieldDescription>
+              <FieldDescription>
+                The date that the order is desired to be picked up on.
+              </FieldDescription>
             </Field>
           </div>
         </CardContent>
       </Card>
 
-          {catalog.map((entry) => (
-      <Card key={entry.category._id}>
-        <CardHeader>
-          <CardTitle>{entry.category.name}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-                {entry.items.map((item) => (
-                  <div
-                    key={item._id}
-                    className="grid grid-cols-[1fr_120px_auto] items-center gap-4"
-                  >
-                    <h5>{item.name}</h5>
+      {catalog.map((entry) => (
+        <Card key={entry.category._id}>
+          <CardHeader>
+            <CardTitle>{entry.category.name}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {entry.items.map((item) => (
+              <div
+                key={item._id}
+                className="grid grid-cols-[1fr_120px_auto] items-center gap-4"
+              >
+                <h5>{item.name}</h5>
 
-                    <Input
-                      type="number"
-                      min={0}
-                      value={getQuantity(item._id)}
-                      onChange={(e) => updateQuantity(item._id, e.target.value)}
-                    />
+                <Input
+                  type="number"
+                  min={0}
+                  value={getQuantity(item._id)}
+                  onChange={(e) => updateQuantity(item._id, e.target.value)}
+                />
 
-                    <span className="text-muted-foreground">{getUnit(item.unitId)?.name}</span>
-                  </div>
-                ))}
-        </CardContent>
-      </Card>
-          ))}
+                <span className="text-muted-foreground">
+                  {getUnit(item.unitId)?.name}
+                </span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      ))}
 
-          <Button onClick={handleSubmit}>Submit Order</Button>
+      <Button onClick={handleSubmit}>Submit Order</Button>
     </div>
   );
 }

@@ -21,6 +21,7 @@ SQUARE_ENVIRONMENT=SANDBOX
 ```
 
 ⚠️ **Important**: Keep production and sandbox tokens separate:
+
 - Use `SQUARE_ACCESS_TOKEN` for the **sandbox token** during `convex dev`
 - Switch to production token only for production deployments
 
@@ -33,12 +34,14 @@ npm run square-sandbox:create-items
 ```
 
 This will:
+
 - Create `Cookie` (Chocolate Chip, Vegan, Double Chocolate variations)
 - Create `Croissant` (Plain, Almond variations)
 - Create `Baguette` (White variation)
 - Save variation IDs to `sandbox-item-mapping.json`
 
 **Output example**:
+
 ```json
 [
   {
@@ -62,6 +65,7 @@ Use the admin page to connect each production catalog item to its Square variati
 6. Save
 
 **Mapping reference** (from `sandbox-item-mapping.json`):
+
 - Production "Cookie" → Square "Cookie - Chocolate Chip" (variation ID: YNZ7O7C2YVCJJ)
 - Production "Cookie" → Square "Cookie - Vegan" (variation ID: HZPDP7P7YVCJJ)
 - etc.
@@ -76,6 +80,7 @@ Use the admin page to connect each production catalog item to its Square variati
 6. Toggle **Enable** for testing
 
 To find your Convex deployment URL:
+
 ```bash
 npx convex env list
 ```
@@ -89,6 +94,7 @@ npm run square-sandbox:test-orders
 ```
 
 This will create:
+
 - **Online order**: Should be processed by your webhook (will appear in retail orders)
 - **POS/In-person order**: Should be ignored by your webhook
 
@@ -109,6 +115,7 @@ npx convex logs
 ```
 
 Look for:
+
 - `handleSquareOrderCreatedWebhook` function executing
 - `order id: xxx` logged
 - No errors in webhook response
@@ -124,6 +131,7 @@ Look for:
 ### Script errors
 
 **"SQUARE_ACCESS_TOKEN is not set"**
+
 ```bash
 export SQUARE_ACCESS_TOKEN=sq_test_xxx...
 npm run square-sandbox:create-items
@@ -142,11 +150,13 @@ Make sure you're using sandbox credentials and have `SQUARE_ENVIRONMENT=SANDBOX`
 ### Orders not appearing in retail orders
 
 Check Convex logs:
+
 ```bash
 npx convex logs
 ```
 
 Look for:
+
 - `No mapped retail items on order` - Items aren't linked to catalog
 - `Square API error` - Token/API issues
 - `Retail order stored` - Success ✅
@@ -188,6 +198,7 @@ When ready for production:
 ### `npm run square-sandbox:create-items`
 
 Creates test items in Square with hardcoded variations:
+
 - Cookie (3 variations)
 - Croissant (2 variations)
 - Baguette (1 variation)
@@ -199,6 +210,7 @@ Saves output to `sandbox-item-mapping.json`.
 ### `npm run square-sandbox:test-orders`
 
 Creates test orders using variation IDs from `sandbox-item-mapping.json`:
+
 - Online order (Pickup fulfillment) - will be processed
 - POS order (In-person fulfillment) - will be ignored
 
