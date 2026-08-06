@@ -17,7 +17,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-const requestableRoles: AssignableUserRole[] = ["client", "employee", "admin"];
+const requestableRoles: AssignableUserRole[] = ["client", "employee"];
 
 export default function PendingAccessPage() {
   const [desiredRole, setDesiredRole] = useState<AssignableUserRole>("client");
