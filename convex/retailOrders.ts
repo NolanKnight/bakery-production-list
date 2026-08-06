@@ -5,7 +5,7 @@ import {
   httpAction,
   internalMutation,
   internalQuery,
-  query
+  query,
 } from "./_generated/server";
 import { requireRole } from "./authorization";
 import { v } from "convex/values";
