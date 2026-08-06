@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 
 import { api } from "../../../convex/_generated/api";
 
@@ -29,21 +29,43 @@ import {
 import { Doc, Id } from "../../../convex/_generated/dataModel";
 import { Separator } from "../ui/separator";
 import { toastError } from "@/lib/errors";
+import { CircleCheck, CircleX, SearchIcon } from "lucide-react";
+import { Table, TableRow } from "../ui/table";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
 
 type Props = {
   item: Doc<"itemCatalog">;
+};
+
+type SquareCatalogItem = {
+  id: string;
+  name: string;
+  description?: string;
+};
+
+const descriptionSnippet = (description?: string) => {
+  if (!description) return "No description";
+  const trimmed = description.trim();
+  if (trimmed.length <= 100) return trimmed;
+  return `${trimmed.slice(0, 100)}...`;
 };
 
 export default function CatalogItemRow({ item }: Props) {
   const units = useQuery(api.units.getUnits);
   const updateItem = useMutation(api.itemCatalog.updateItem);
   const deleteItem = useMutation(api.itemCatalog.deleteItem);
+  const setSquareItemConnection = useMutation(api.itemCatalog.setSquareItemConnection);
+  const getSquareCatalogItems = useAction(api.itemCatalog.getSquareCatalogItems);
 
   const [editing, setEditing] = useState(false);
   const [open, setOpen] = useState(false);
+  const [squareDialogOpen, setSquareDialogOpen] = useState(false);
+  const [loadingSquareItems, setLoadingSquareItems] = useState(false);
+  const [connectingSquareItemId, setConnectingSquareItemId] = useState<string | null>(null);
+  const [squareCatalogItems, setSquareCatalogItems] = useState<SquareCatalogItem[]>([]);
+  const [squareItemsQuery, setSquareItemsQuery] = useState("");
 
   const [name, setName] = useState(item.name);
-  const [squareItemId, setSquareItemId] = useState(item.squareItemId ?? "");
 
   const [unitId, setUnitId] = useState<Id<"units">>(item.unitId);
   const unitMap = useMemo(() => {
@@ -54,6 +76,26 @@ export default function CatalogItemRow({ item }: Props) {
     return map;
   }, [units]);
 
+  const displayedSquareItems = useMemo(() => {
+    const normalizedQuery = squareItemsQuery.trim().toLowerCase();
+    const filtered = squareCatalogItems.filter((squareItem) =>
+      squareItem.name.toLowerCase().includes(normalizedQuery),
+    );
+
+    if (!item.squareItemId) return filtered;
+
+    const selected = squareCatalogItems.find(
+      (squareItem) => squareItem.id === item.squareItemId,
+    );
+    if (!selected) return filtered;
+
+    const withoutSelected = filtered.filter(
+      (squareItem) => squareItem.id !== item.squareItemId,
+    );
+
+    return [selected, ...withoutSelected];
+  }, [squareCatalogItems, squareItemsQuery, item.squareItemId]);
+
   const handleSave = async () => {
     if (!name.trim() || !unitId) {
       return;
@@ -63,7 +105,6 @@ export default function CatalogItemRow({ item }: Props) {
       id: item._id,
       name: name.trim(),
       unitId: unitId,
-      squareItemId: squareItemId.trim(),
     }).catch(toastError);
 
     setEditing(false);
@@ -72,8 +113,45 @@ export default function CatalogItemRow({ item }: Props) {
   const handleCancel = () => {
     setName(item.name);
     setUnitId(item.unitId);
-    setSquareItemId(item.squareItemId ?? "");
     setEditing(false);
+  };
+
+  const loadSquareCatalogItems = async () => {
+    setLoadingSquareItems(true);
+    try {
+      const items = await getSquareCatalogItems({});
+      setSquareCatalogItems(items);
+    } catch (e) {
+      toastError(e);
+    } finally {
+      setLoadingSquareItems(false);
+    }
+  };
+
+  const handleEditSquareConnection = async () => {
+    setSquareDialogOpen(true);
+    if (squareCatalogItems.length === 0) {
+      await loadSquareCatalogItems();
+    }
+  };
+
+  const setSquareConnection = async (squareItemId: string | undefined) => {
+    setConnectingSquareItemId(squareItemId ?? null);
+    try {
+      await setSquareItemConnection({
+        id: item._id,
+        squareItemId,
+      });
+    } catch (e) {
+      toastError(e);
+    } finally {
+      setConnectingSquareItemId(null);
+    }
+  };
+
+  const toggleSquareSelection = async (squareItemId: string) => {
+    const isSelected = item.squareItemId === squareItemId;
+    await setSquareConnection(isSelected ? undefined : squareItemId);
   };
 
   const handleDelete = async () => {
@@ -90,12 +168,12 @@ export default function CatalogItemRow({ item }: Props) {
   return (
     <>
       <Separator />
-      <div className="grid grid-cols-[1fr_150px_1fr_auto_auto] items-center gap-4 py-2">
+      <div className="grid grid-cols-4 text-center place-items-center gap-4 py-2">
         {/* Item Name */}
         {editing ? (
           <Input value={name} onChange={(e) => setName(e.target.value)} />
         ) : (
-          <h5>{item.name}</h5>
+          <h5 className="text-left justify-self-start">{item.name}</h5>
         )}
 
         {/* Unit */}
@@ -128,20 +206,30 @@ export default function CatalogItemRow({ item }: Props) {
           </span>
         )}
 
-        {/* Square Item ID */}
+        {/* Square connection */}
         {editing ? (
-          <Input
-            value={squareItemId}
-            onChange={(e) => setSquareItemId(e.target.value)}
-            placeholder="Square item id"
-          />
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              void handleEditSquareConnection();
+            }}
+          >
+            {item.squareItemId
+              ? "Edit Square Connection"
+              : "Connect to Square"}
+          </Button>
         ) : (
-          <span className="text-muted-foreground">
-            {item.squareItemId ?? "No Square item id"}
+          <div className="space-x-2 flex items-center">
+          {(item.squareItemId ? <CircleCheck className="text-primary/50" size="20" /> : <CircleX className="text-destructive/50" size="20" />)}
+          <span className={item.squareItemId ? "text-muted-foreground" : "text-muted-foreground"}>
+            {item.squareItemId ? "Connected to Square" : "Not connected"}
           </span>
+          </div>
         )}
 
         {/* Edit / Save */}
+        <div className="flex space-x-4 items-center justify-self-end">
         {editing ? (
           <Button
             size="sm"
@@ -195,6 +283,87 @@ export default function CatalogItemRow({ item }: Props) {
           </AlertDialog>
         )}
       </div>
+      </div>
+
+      <AlertDialog open={squareDialogOpen} onOpenChange={setSquareDialogOpen}>
+        <AlertDialogContent className="max-w-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Connect to Square</AlertDialogTitle>
+            <AlertDialogDescription>
+              Select the Square item to connect to "{item.name}".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-3">
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={loadingSquareItems}
+                onClick={() => {
+                  void loadSquareCatalogItems();
+                }}
+              >
+                {loadingSquareItems ? "Loading..." : "Refresh list"}
+              </Button>
+            </div>
+
+            <InputGroup>
+              <InputGroupInput placeholder="Search..." value={squareItemsQuery} onChange={(e) => setSquareItemsQuery(e.target.value)} />
+              <InputGroupAddon>
+                <SearchIcon />
+              </InputGroupAddon>
+            </InputGroup>
+
+            <div className="max-h-[50vh] overflow-y-auto space-y-4">
+            <Table>
+              {displayedSquareItems.map((squareItem) => {
+                const isSelected = squareItem.id === item.squareItemId;
+                return (
+                <TableRow key={squareItem.id}>
+                  <button
+                    type="button"
+                    className="w-full text-left space-y-1 p-3 disabled:opacity-50 cursor-pointer"
+                    disabled={connectingSquareItemId !== null}
+                    onClick={() => {
+                      void toggleSquareSelection(squareItem.id);
+                    }}
+                  >
+                    <p className="font-medium flex items-center gap-2">
+                      {squareItem.name}
+                      {isSelected && (
+                        <span className="text-xs rounded bg-primary/10 text-primary px-2 py-0.5">
+                          Currently selected
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {descriptionSnippet(squareItem.description)}
+                    </p>
+                    {isSelected && (
+                      <p className="text-xs text-muted-foreground">
+                        Click again to unselect.
+                      </p>
+                    )}
+                  </button>
+                </TableRow>
+                );
+              })}
+
+              {!loadingSquareItems && displayedSquareItems.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No Square items found.
+                </p>
+              )}
+            </Table>
+            </div>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Close</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

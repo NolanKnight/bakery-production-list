@@ -1,15 +1,18 @@
-import { internal } from "./_generated/api";
+import { GenericActionCtx } from "convex/server";
+import { api, internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import {
+  action,
   httpAction,
   internalMutation,
   internalQuery,
+  MutationCtx,
   query,
 } from "./_generated/server";
 import { requireRole } from "./authorization";
 import { v } from "convex/values";
 
-const SQUARE_API_URL = "https://connect.squareup.com/v2/orders";
+const SQUARE_API_URL = process.env.SQUARE_API_URL + "/v2/orders";
 const SQUARE_API_VERSION = "2026-07-22";
 const ONLINE_ORDER_EVENT_TYPE = "order.created";
 const IN_PERSON_SOURCE_NAME = "square point of sale";
@@ -140,10 +143,17 @@ const extractCustomer = (order: unknown): {
 };
 
 const extractLineItems = (order: unknown): SquareOrderLineItem[] => {
-  if (!isRecord(order)) return [];
-  if (!Array.isArray(order.lineItems)) return [];
+  if (!isRecord(order)) {
+    console.log("not a record");
+    return [];
+  }
 
-  return order.lineItems;
+  if (!Array.isArray(order.line_items)) {
+    console.log("no line items");
+    return [];
+  }
+
+  return order.line_items;
 };
 
 export const getRetailOrders = query({
@@ -217,12 +227,97 @@ export const upsertRetailOrderFromSquare = internalMutation({
   },
 });
 
-export const handleSquareOrderCreatedWebhook = httpAction(async (ctx, req) => {
-  const squareAccessToken = process.env.SQUARE_ACCESS_TOKEN;
-  if (!squareAccessToken) {
-    return new Response("SQUARE_ACCESS_TOKEN is not configured", { status: 500 });
-  }
+export const handleSquareOrderCreated = async (ctx: GenericActionCtx<any>, payload: any) => {
+    const squareAccessToken = process.env.SQUARE_ACCESS_TOKEN;
+    if (!squareAccessToken) {
+      return new Response("SQUARE_ACCESS_TOKEN is not configured", { status: 500 });
+    }
 
+    const eventType = getEventType(payload);
+    if (eventType !== ONLINE_ORDER_EVENT_TYPE) {
+      return new Response("Ignored event type", { status: 200 });
+    }
+
+    const orderId = extractOrderId(payload);
+    if (!orderId) {
+      return new Response("Missing order id in payload", { status: 400 });
+    }
+
+    const response = await fetch(`${SQUARE_API_URL}/${orderId}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${squareAccessToken}`,
+        "Square-Version": SQUARE_API_VERSION,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      return new Response(`Square API error: ${body}`, { status: response.status });
+    }
+
+    const json: unknown = await response.json();
+
+    console.log(json);
+
+    const order = getRecord(json, "order");
+
+    if (!order) {
+      return new Response("Square response missing order", { status: 502 });
+    }
+
+    if (isInPersonOrder(order)) {
+      return new Response("Ignored in-person order", { status: 200 });
+    }
+
+    const catalogLookup: { itemId: Id<"itemCatalog">; squareItemId: string }[] =
+      await ctx.runQuery(internal.retailOrders.getSquareItemLookup, {});
+    const itemIdBySquareCatalogId = new Map(
+      catalogLookup.map((entry) => 
+       [entry.squareItemId, entry.itemId]
+      ),
+    );
+
+    const itemTotals = new Map<Id<"itemCatalog">, number>();
+    const lineItems = extractLineItems(order);
+    
+    for (const lineItem of lineItems) {
+      const catalogObjectId =
+        typeof lineItem.catalog_object_id === "string"
+          ? lineItem.catalog_object_id
+          : null;
+      if (!catalogObjectId) continue;
+
+      const itemId = itemIdBySquareCatalogId.get(catalogObjectId);
+      if (!itemId) continue;
+
+      const quantity = Number(lineItem.quantity);
+      if (!Number.isFinite(quantity) || quantity <= 0) continue;
+
+      itemTotals.set(itemId, (itemTotals.get(itemId) ?? 0) + quantity);
+    }
+
+    if (itemTotals.size === 0) {
+      return new Response("No mapped retail items on order", { status: 200 });
+    }
+
+    await ctx.runMutation(internal.retailOrders.upsertRetailOrderFromSquare, {
+      squareOrderId: orderId,
+      desiredDate: extractDesiredDate(order),
+      createdAt: Date.now(),
+      sourceName: getSourceName(order) ?? undefined,
+      customer: extractCustomer(order),
+      items: [...itemTotals.entries()].map(([itemId, quantity]) => ({
+        itemId,
+        quantity,
+      })),
+    });
+
+    return new Response("Retail order stored", { status: 200 });
+};
+
+export const handleSquareOrderCreatedWebhook = httpAction(async (ctx, req) => {
   let payload: unknown;
   try {
     payload = await req.json();
@@ -230,78 +325,5 @@ export const handleSquareOrderCreatedWebhook = httpAction(async (ctx, req) => {
     return new Response("Invalid JSON body", { status: 400 });
   }
 
-  const eventType = getEventType(payload);
-  if (eventType !== ONLINE_ORDER_EVENT_TYPE) {
-    return new Response("Ignored event type", { status: 200 });
-  }
-
-  const orderId = extractOrderId(payload);
-  if (!orderId) {
-    return new Response("Missing order id in payload", { status: 400 });
-  }
-
-  const response = await fetch(`${SQUARE_API_URL}/${orderId}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${squareAccessToken}`,
-      "Square-Version": SQUARE_API_VERSION,
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!response.ok) {
-    const body = await response.text();
-    return new Response(`Square API error: ${body}`, { status: response.status });
-  }
-
-  const json: unknown = await response.json();
-  const order = getRecord(json, "order");
-  if (!order) {
-    return new Response("Square response missing order", { status: 502 });
-  }
-
-  if (isInPersonOrder(order)) {
-    return new Response("Ignored in-person order", { status: 200 });
-  }
-
-  const catalogLookup: { itemId: Id<"itemCatalog">; squareItemId: string }[] =
-    await ctx.runQuery(internal.retailOrders.getSquareItemLookup, {});
-  const itemIdBySquareCatalogId = new Map(
-    catalogLookup.map((entry) => [entry.squareItemId, entry.itemId]),
-  );
-
-  const itemTotals = new Map<Id<"itemCatalog">, number>();
-  for (const lineItem of extractLineItems(order)) {
-    const catalogObjectId =
-      typeof lineItem.catalog_object_id === "string"
-        ? lineItem.catalog_object_id
-        : null;
-    if (!catalogObjectId) continue;
-
-    const itemId = itemIdBySquareCatalogId.get(catalogObjectId);
-    if (!itemId) continue;
-
-    const quantity = Number(lineItem.quantity);
-    if (!Number.isFinite(quantity) || quantity <= 0) continue;
-
-    itemTotals.set(itemId, (itemTotals.get(itemId) ?? 0) + quantity);
-  }
-
-  if (itemTotals.size === 0) {
-    return new Response("No mapped retail items on order", { status: 200 });
-  }
-
-  await ctx.runMutation(internal.retailOrders.upsertRetailOrderFromSquare, {
-    squareOrderId: orderId,
-    desiredDate: extractDesiredDate(order),
-    createdAt: Date.now(),
-    sourceName: getSourceName(order) ?? undefined,
-    customer: extractCustomer(order),
-    items: [...itemTotals.entries()].map(([itemId, quantity]) => ({
-      itemId,
-      quantity,
-    })),
-  });
-
-  return new Response("Retail order stored", { status: 200 });
+  return await handleSquareOrderCreated(ctx, payload);
 });

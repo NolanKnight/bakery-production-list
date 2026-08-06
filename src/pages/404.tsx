@@ -15,8 +15,6 @@ export default function PageNotFoundPage ({ links }: { links: Link[] }) {
     link.name.toLowerCase().includes(query.toLowerCase())
   );
 
-  //focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30
-
   return (
     <div className="mx-auto max-w-5xl p-6 space-y-6 text-center flex place-items-center">
       <Card className="overflow-visible mb-14">

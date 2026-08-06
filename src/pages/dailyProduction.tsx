@@ -4,7 +4,7 @@ import { api } from "../../convex/_generated/api";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Doc, Id } from "../../convex/_generated/dataModel";
+import { Id } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { toastError } from "@/lib/errors";
 import {
@@ -33,7 +33,7 @@ export default function DailyProductionPage() {
 
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [showPrintWarning, setShowPrintWarning] = useState(false);
-  const [selectedBakerRole, setSelectedBakerRole] = useState<Doc<"bakerRoles"> | typeof none>(none);
+  const [selectedBakerRole, setSelectedBakerRole] = useState<typeof none>(none);
 
   const setOverride = useMutation(api.production.setOverride);
   const overrides = useQuery(api.production.getOverrides, { date });

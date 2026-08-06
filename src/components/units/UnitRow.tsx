@@ -70,7 +70,7 @@ export default function CatalogItemRow({ unit }: Props) {
   return (
     <>
       <Separator />
-      <div className="grid grid-cols-3 items-center gap-4 py-2">
+      <div className="grid grid-cols-2 items-center gap-4 py-2">
         {/* Item Name */}
         {editing ? (
           <Input value={name} onChange={(e) => setName(e.target.value)} />
@@ -78,6 +78,7 @@ export default function CatalogItemRow({ unit }: Props) {
           <span>{unit.name}</span>
         )}
 
+        <div className="flex justify-end space-x-4">
         {/* Edit / Save */}
         {editing ? (
           <Button size="sm" onClick={handleSave}>
@@ -121,6 +122,7 @@ export default function CatalogItemRow({ unit }: Props) {
             </AlertDialogContent>
           </AlertDialog>
         )}
+      </div>
       </div>
     </>
   );
