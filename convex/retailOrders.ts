@@ -1,5 +1,5 @@
 import { GenericActionCtx } from "convex/server";
-import { api, internal } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import {
   action,
@@ -84,22 +84,22 @@ const extractDesiredDate = (order: unknown): string => {
     if (!isRecord(fulfillment)) continue;
 
     const pickupAt = asDateString(
-      getString(getRecord(fulfillment, "pickupDetails"), "pickupAt"),
+      getString(getRecord(fulfillment, "pickup_details"), "pickup_at"),
     );
     if (pickupAt) return pickupAt;
 
     const deliverAt = asDateString(
-      getString(getRecord(fulfillment, "deliveryDetails"), "deliverAt"),
+      getString(getRecord(fulfillment, "delivery_details"), "deliver_at"),
     );
     if (deliverAt) return deliverAt;
 
     const shipAt = asDateString(
-      getString(getRecord(fulfillment, "shipmentDetails"), "expectedShippedAt"),
+      getString(getRecord(fulfillment, "shipment_details"), "expected_shipped_at"),
     );
     if (shipAt) return shipAt;
   }
 
-  return asDateString(getString(order, "createdAt")) ?? new Date().toISOString().slice(0, 10);
+  return asDateString(getString(order, "created_at")) ?? new Date().toISOString().slice(0, 10);
 };
 
 const extractCustomer = (order: unknown): {
@@ -115,26 +115,27 @@ const extractCustomer = (order: unknown): {
     if (!isRecord(fulfillment)) continue;
 
     const pickupRecipient = getRecord(
-      getRecord(fulfillment, "pickupDetails"),
+      getRecord(fulfillment, "pickup_details"),
       "recipient",
     );
+
     if (pickupRecipient) {
       return {
-        name: getString(pickupRecipient, "displayName") ?? undefined,
-        email: getString(pickupRecipient, "emailAddress") ?? undefined,
-        phone: getString(pickupRecipient, "phoneNumber") ?? undefined,
+        name: getString(pickupRecipient, "display_name") ?? undefined,
+        email: getString(pickupRecipient, "email_address") ?? undefined,
+        phone: getString(pickupRecipient, "phone_number") ?? undefined,
       };
     }
 
     const deliveryRecipient = getRecord(
-      getRecord(fulfillment, "deliveryDetails"),
+      getRecord(fulfillment, "delivery_details"),
       "recipient",
     );
     if (deliveryRecipient) {
       return {
-        name: getString(deliveryRecipient, "displayName") ?? undefined,
-        email: getString(deliveryRecipient, "emailAddress") ?? undefined,
-        phone: getString(deliveryRecipient, "phoneNumber") ?? undefined,
+        name: getString(deliveryRecipient, "display_name") ?? undefined,
+        email: getString(deliveryRecipient, "email_address") ?? undefined,
+        phone: getString(deliveryRecipient, "phone_number") ?? undefined,
       };
     }
   }
@@ -144,12 +145,10 @@ const extractCustomer = (order: unknown): {
 
 const extractLineItems = (order: unknown): SquareOrderLineItem[] => {
   if (!isRecord(order)) {
-    console.log("not a record");
     return [];
   }
 
   if (!Array.isArray(order.line_items)) {
-    console.log("no line items");
     return [];
   }
 
