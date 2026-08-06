@@ -133,7 +133,7 @@ function AppRoutes() {
     );
   }
 
-  const defaultRoute = "/production";
+  const defaultRoute = userRole.links[0]?.path ?? "/production";
 
   return (
     <Layout userRole={userRole}>

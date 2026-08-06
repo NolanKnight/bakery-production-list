@@ -25,11 +25,11 @@ export type AssignableUserRole = (typeof ASSIGNABLE_USER_ROLES)[number];
 export default class UserRole {
   public static readonly None: UserRole = new UserRole("none", "No Access", []);
   public static readonly Admin: UserRole = new UserRole("admin", "Admin", [
+    Production,
     Par,
     WholesaleForm,
     WholesaleOrders,
     RetailOrders,
-    Production,
     Inventory,
     ItemCatalog,
     AccessManagement,

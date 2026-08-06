@@ -11,8 +11,6 @@ import { toast } from "sonner";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import Loading from "@/components/loading";
 
-type OrderValues = { itemId: Id<"itemCatalog">; quantity: number }[];
-
 export default function WholesaleOrderForm() {
   const catalog = useQuery(api.itemCatalog.getItems, {});
   const units = useQuery(api.units.getUnits);
@@ -21,25 +19,36 @@ export default function WholesaleOrderForm() {
   const [email, setEmail] = useState("");
   const [desiredDate, setDesiredDate] = useState("");
 
-  const [orders, setOrders] = useState<OrderValues>([]);
+  const [orders, setOrders] = useState<Map<Id<"itemCatalog">, number>>();
 
   const createWholesaleOrder = useMutation(
     api.wholesaleOrders.createWholesaleOrder,
   );
 
-  const updateQuantity = (itemId: string, value: string) => {
-    setOrders((prev) => ({
-      ...prev,
-      [itemId]: value === "" ? 0 : Number(value),
-    }));
+  const updateQuantity = (itemId: Id<"itemCatalog">, value: string) => {
+    console.log("update");
+    const quantity = value === "" ? 0 : Number(value);
+
+    console.log(orders);
+    setOrders((prev) => {
+      const map = prev ?? new Map();
+      map.set(itemId, quantity);
+      return map;
+    });
+    console.log(orders);
   };
 
   const handleSubmit = async () => {
+    if (!orders) {
+      toast.error("Cannot submit an empty order.");
+      return;
+    }
+
     const order = {
       clientName,
       email,
       desiredDate,
-      items: orders.filter((order) => order.quantity > 0),
+      items: [...orders.entries()].map(([itemId, quantity]) => {return {itemId, quantity}}).filter((order) => order.quantity > 0),
     };
 
     await createWholesaleOrder(order)
@@ -50,16 +59,18 @@ export default function WholesaleOrderForm() {
     setClientName("");
     setEmail("");
     setDesiredDate("");
-    setOrders([]);
+    setOrders(new Map());
   };
 
   const getQuantity = (itemId: Id<"itemCatalog">) => {
-    for (const order of orders) {
-      if (order.itemId === itemId) {
-        return order.quantity;
+    if (!orders) return 0;
+
+    for (const order of orders.entries()) {
+      if (order[0] === itemId) {
+        return order[1];
       }
     }
-
+  
     return 0;
   };
 
