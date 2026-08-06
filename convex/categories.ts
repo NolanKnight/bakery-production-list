@@ -1,14 +1,6 @@
-import { mutation, query } from "./_generated/server";
+import { mutation } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
 import { requireRole } from "./authorization";
-
-export const getCategories = query({
-  args: {},
-  handler: async (ctx) => {
-    await requireRole(ctx, ["admin"]);
-    return await ctx.db.query("categories").withIndex("by_sortOrder").collect();
-  },
-});
 
 export const addCategory = mutation({
   args: {
@@ -27,6 +19,7 @@ export const addCategory = mutation({
     await ctx.db.insert("categories", {
       name: args.name.trim(),
       sortOrder,
+      active: true,
     });
   },
 });
@@ -52,17 +45,19 @@ export const deleteCategory = mutation({
 
   handler: async (ctx, args) => {
     await requireRole(ctx, ["admin"]);
-    const item = await ctx.db
+    const items = await ctx.db
       .query("itemCatalog")
       .filter((q) => q.eq(q.field("categoryId"), args.id))
-      .first();
+      .collect();
 
-    if (item) {
-      throw new ConvexError({
-        message: "Cannot delete a category that is in use.",
-      });
-    }
+    items.forEach((item) => {
+      if (item.active) {
+        throw new ConvexError({
+          message: "Cannot delete a category that is in use.",
+        });
+      }
+    });
 
-    await ctx.db.delete(args.id);
+    await ctx.db.patch("categories", args.id, { active: false });
   },
 });

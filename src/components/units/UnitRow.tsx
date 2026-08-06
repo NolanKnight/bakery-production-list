@@ -44,7 +44,9 @@ export default function CatalogItemRow({ unit }: Props) {
     await updateUnit({
       id: unit._id,
       name: name.trim(),
-    }).catch(toastError);
+    })
+      .then(() => toast.success(`Successfully updated ${name.trim()}.`))
+      .catch(toastError);
 
     setEditing(false);
   };

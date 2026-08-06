@@ -25,7 +25,7 @@ export default function RetailOrderPage() {
     api.retailOrders.getRetailOrder,
     orderId ? { orderId } : "skip",
   );
-  const catalog = useQuery(api.itemCatalog.getItems);
+  const catalog = useQuery(api.itemCatalog.getItems, { includeInactive: true });
   const units = useQuery(api.units.getUnits);
 
   const itemLookup = useMemo(() => {

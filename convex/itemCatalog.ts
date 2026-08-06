@@ -119,13 +119,15 @@ const listSquareCatalogItems = async (
   return result;
 };
 
-export const getCatalog = async (ctx: QueryCtx) => {
+export const getCatalog = async (ctx: QueryCtx, includeInactive?: boolean) => {
   const categories = await ctx.db.query("categories").collect();
   const items = await ctx.db
     .query("itemCatalog")
     .withIndex("by_sortOrder")
     .collect()
-    .then((items) => items.filter((item) => item.active));
+    .then((items) =>
+      includeInactive ? items : items.filter((item) => item.active),
+    );
 
   const categoryMap = new Map<
     string,
@@ -137,6 +139,8 @@ export const getCatalog = async (ctx: QueryCtx) => {
 
   for (const cat of categories) {
     let catItems: Doc<"itemCatalog">[] = [];
+
+    if (!cat.active && !includeInactive) continue;
 
     for (const item of items) {
       if (item.categoryId === cat._id) {
@@ -154,10 +158,12 @@ export const getCatalog = async (ctx: QueryCtx) => {
 };
 
 export const getItems = query({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    includeInactive: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
     await requireRole(ctx, ["admin", "employee", "client"]);
-    return await getCatalog(ctx);
+    return await getCatalog(ctx, args.includeInactive);
   },
 });
 

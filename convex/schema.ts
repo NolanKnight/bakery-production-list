@@ -18,6 +18,7 @@ export default defineSchema({
   categories: defineTable({
     name: v.string(),
     sortOrder: v.number(),
+    active: v.boolean(),
   }).index("by_sortOrder", ["sortOrder"]),
   units: defineTable({
     name: v.string(),
