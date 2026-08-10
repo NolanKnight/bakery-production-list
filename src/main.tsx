@@ -1,3 +1,5 @@
+import "@/../instrument";
+
 import { JSX, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -31,6 +33,8 @@ import type { UserRoleValue } from "@/../shared/userRole";
 import { Toaster } from "./components/ui/sonner";
 import InventoryPage from "./pages/inventory";
 import ClientDashboardPage from "./pages/clientDashboard";
+
+import * as Sentry from "@sentry/react";
 
 const convex = new ConvexReactClient(
   import.meta.env.VITE_CONVEX_URL as string,
@@ -172,13 +176,21 @@ function AppRoutes() {
   );
 }
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById("root")!, {
+  onUncaughtError: Sentry.reactErrorHandler((error, errorInfo) => {
+    console.warn("Uncaught error", error, errorInfo.componentStack);
+  }),
+  onCaughtError: Sentry.reactErrorHandler(),
+  onRecoverableError: Sentry.reactErrorHandler(),
+}).render(
   <StrictMode>
-    <ConvexBetterAuthProvider client={convex} authClient={authClient as any}>
-      <BrowserRouter>
-        <AppRoutes />
-        <Toaster position="top-center" />
-      </BrowserRouter>
-    </ConvexBetterAuthProvider>
+    <Sentry.ErrorBoundary>
+      <ConvexBetterAuthProvider client={convex} authClient={authClient as any}>
+        <BrowserRouter>
+          <AppRoutes />
+          <Toaster position="top-center" />
+        </BrowserRouter>
+      </ConvexBetterAuthProvider>
+    </Sentry.ErrorBoundary>
   </StrictMode>,
 );

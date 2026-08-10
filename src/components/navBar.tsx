@@ -35,7 +35,7 @@ export default function NavBar({ userRole }: { userRole: UserRole }) {
               return;
 
             return (
-              <NavigationMenuItem>
+              <NavigationMenuItem key={item.name}>
                 <NavigationMenuTrigger>{item.name}</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   {item.links.map((link) => {
@@ -43,6 +43,7 @@ export default function NavBar({ userRole }: { userRole: UserRole }) {
 
                     return (
                       <NavigationMenuLink
+                        key={link.path}
                         href={link.path}
                         className={navigationMenuTriggerStyle()}
                       >
