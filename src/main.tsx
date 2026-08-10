@@ -30,6 +30,7 @@ import { api } from "../convex/_generated/api";
 import type { UserRoleValue } from "@/../shared/userRole";
 import { Toaster } from "./components/ui/sonner";
 import InventoryPage from "./pages/inventory";
+import ClientDashboardPage from "./pages/clientDashboard";
 
 const convex = new ConvexReactClient(
   import.meta.env.VITE_CONVEX_URL as string,
@@ -57,7 +58,7 @@ const authenticatedRoutes: {
   {
     path: "/wholesale-order/:id",
     element: <WholesaleOrderPage />,
-    allowedRoles: ["admin"] as const,
+    allowedRoles: ["admin", "client"] as const,
   },
   {
     path: "/retail-orders",
@@ -133,7 +134,7 @@ function AppRoutes() {
     );
   }
 
-  const defaultRoute = "/production";
+  const defaultRoute = userRole.links[0]?.path ?? "/production";
 
   return (
     <Layout userRole={userRole}>
@@ -141,7 +142,16 @@ function AppRoutes() {
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="/signup" element={<Navigate to="/" replace />} />
         <Route path="/pending-access" element={<Navigate to="/" replace />} />
-        <Route path="/" element={<Navigate to={defaultRoute} replace />} />
+        <Route
+          path="/"
+          element={
+            userRole.value === "client" ? (
+              <ClientDashboardPage />
+            ) : (
+              <Navigate to={defaultRoute} replace />
+            )
+          }
+        />
 
         {authenticatedRoutes
           .filter((route) =>

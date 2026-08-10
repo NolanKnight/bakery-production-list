@@ -31,6 +31,7 @@ export const BakerRoles: Link = {
   path: "/admin/baker-roles",
 };
 export const Account: Link = { name: "Account", path: "/account" };
+export const Dashboard: Link = { name: "Dashboard", path: "/" };
 
 export const isLink = (value: unknown): value is Link => {
   return (
@@ -44,6 +45,7 @@ export const isLink = (value: unknown): value is Link => {
 };
 
 export const Navigation = [
+  Dashboard,
   Production,
   {
     name: "User Management",

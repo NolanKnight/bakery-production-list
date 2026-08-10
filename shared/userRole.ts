@@ -10,6 +10,7 @@ import {
   RetailOrders,
   WholesaleForm,
   WholesaleOrders,
+  Dashboard,
 } from "./links";
 
 export const USER_ROLE_VALUES = [
@@ -25,11 +26,11 @@ export type AssignableUserRole = (typeof ASSIGNABLE_USER_ROLES)[number];
 export default class UserRole {
   public static readonly None: UserRole = new UserRole("none", "No Access", []);
   public static readonly Admin: UserRole = new UserRole("admin", "Admin", [
+    Production,
     Par,
     WholesaleForm,
     WholesaleOrders,
     RetailOrders,
-    Production,
     Inventory,
     ItemCatalog,
     AccessManagement,
@@ -42,6 +43,7 @@ export default class UserRole {
     [Inventory, Production, Account],
   );
   public static readonly Client: UserRole = new UserRole("client", "Client", [
+    Dashboard,
     WholesaleForm,
     Account,
   ]);

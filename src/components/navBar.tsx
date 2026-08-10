@@ -20,7 +20,7 @@ export default function NavBar({ userRole }: { userRole: UserRole }) {
               if (!userRole.links.includes(item)) return;
 
               return (
-                <NavigationMenuItem>
+                <NavigationMenuItem key={item.path}>
                   <NavigationMenuLink
                     href={item.path}
                     className={navigationMenuTriggerStyle()}
