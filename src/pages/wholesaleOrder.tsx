@@ -28,6 +28,7 @@ export default function WholesaleOrderPage() {
   );
   const catalog = useQuery(api.itemCatalog.getItems, { includeInactive: true });
   const units = useQuery(api.units.getUnits);
+  const roleState = useQuery(api.auth.getCurrentUserRole);
 
   const itemLookup = useMemo(() => {
     const lookup = new Map<
@@ -51,7 +52,7 @@ export default function WholesaleOrderPage() {
     return lookup;
   }, [catalog, units]);
 
-  if (!catalog || !units) return <Loading />;
+  if (!catalog || !units || roleState === undefined) return <Loading />;
 
   if (!order) {
     return (
@@ -66,14 +67,14 @@ export default function WholesaleOrderPage() {
     <div className="mx-auto max-w-4xl space-y-6 p-6">
       <div className="flex flex-col items-start">
         <Link
-          to="/wholesale-orders"
+          to={roleState.role === "client" ? "/" : "/wholesale-orders"}
           className={cn(
             buttonVariants({ variant: "link", size: "lg" }),
             "px-0",
           )}
         >
           <MoveLeft />
-          Back to orders
+          {roleState.role === "client" ? "Back to Dashboard" : "Back to Orders"}
         </Link>
         <h3>Wholesale Order</h3>
       </div>

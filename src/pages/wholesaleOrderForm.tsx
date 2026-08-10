@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,37 +11,51 @@ import { toastError } from "@/lib/errors";
 import { toast } from "sonner";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import Loading from "@/components/loading";
+import { authClient } from "@/lib/auth-client";
 
 export default function WholesaleOrderForm() {
+  const session = authClient.useSession();
+  
   const catalog = useQuery(api.itemCatalog.getItems, {});
   const units = useQuery(api.units.getUnits);
 
-  const [clientName, setClientName] = useState("");
-  const [email, setEmail] = useState("");
+  const [clientName, setClientName] = useState<string>();
+  const [email, setEmail] = useState<string>();
   const [desiredDate, setDesiredDate] = useState("");
 
-  const [orders, setOrders] = useState<Map<Id<"itemCatalog">, number>>();
+  const [orders, setOrders] = useState<Map<Id<"itemCatalog">, number>>(
+    new Map(),
+  );
+
+  const navigate = useNavigate();
 
   const createWholesaleOrder = useMutation(
     api.wholesaleOrders.createWholesaleOrder,
   );
 
+  useEffect(() => {
+    setClientName(session.data?.user?.name);
+    setEmail(session.data?.user?.email);
+  }, [session.data?.user]);
+
   const updateQuantity = (itemId: Id<"itemCatalog">, value: string) => {
-    console.log("update");
     const quantity = value === "" ? 0 : Number(value);
 
-    console.log(orders);
     setOrders((prev) => {
-      const map = prev ?? new Map();
+      const map = new Map(prev);
       map.set(itemId, quantity);
       return map;
     });
-    console.log(orders);
   };
 
   const handleSubmit = async () => {
-    if (!orders) {
-      toast.error("Cannot submit an empty order.");
+    if (!desiredDate.trim()) {
+      toast.error("Please enter a desired date for the order.");
+      return;
+    }
+
+    if (!clientName || !email) {
+      toast.error("The user name and email cannot be found");
       return;
     }
 
@@ -48,30 +63,29 @@ export default function WholesaleOrderForm() {
       clientName,
       email,
       desiredDate,
-      items: [...orders.entries()].map(([itemId, quantity]) => {return {itemId, quantity}}).filter((order) => order.quantity > 0),
+      items: [...orders.entries()]
+        .map(([itemId, quantity]) => ({ itemId, quantity }))
+        .filter((order) => order.quantity > 0),
     };
 
-    await createWholesaleOrder(order)
-      .then(() => toast.success("Successfully submitted order."))
-      .catch(toastError);
+    if (order.items.length === 0) {
+      toast.error("Cannot submit an empty order.");
+      return;
+    }
 
-    // optional reset
+    try {
+      const orderId = await createWholesaleOrder(order);
+      toast.success("Successfully submitted order.");
+      navigate(`/wholesale-order/${orderId}`);
+    } catch (error) {
+      toastError(error);
+      return;
+    }
+
     setClientName("");
     setEmail("");
     setDesiredDate("");
     setOrders(new Map());
-  };
-
-  const getQuantity = (itemId: Id<"itemCatalog">) => {
-    if (!orders) return 0;
-
-    for (const order of orders.entries()) {
-      if (order[0] === itemId) {
-        return order[1];
-      }
-    }
-  
-    return 0;
   };
 
   const getUnit = (id: Id<"units">) => {
@@ -84,50 +98,25 @@ export default function WholesaleOrderForm() {
     }
   };
 
-  if (!catalog) return <Loading />;
+  if (!catalog || !clientName || !email) return <Loading />;
 
   return (
     <div className="mx-auto max-w-4xl p-6 space-y-6">
       <h3>New Order</h3>
       <Card>
         <CardContent className="space-y-4">
-          {/* Client Info */}
-          <div className="grid gap-4">
-            <Field>
-              <FieldLabel htmlFor="client-name">Client Name</FieldLabel>
-              <Input
-                id="client-name"
-                placeholder="Buttercup Bakery"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="client-email">Client Email</FieldLabel>
-              <Input
-                id="client-email"
-                type="email"
-                placeholder="example@buttercupmb.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <FieldDescription>
-                Email address to receieve the receipt.
-              </FieldDescription>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="desired-date">Desired Date</FieldLabel>
-              <Input
-                id="desired-date"
-                type="date"
-                value={desiredDate}
-                onChange={(e) => setDesiredDate(e.target.value)}
-              />
-              <FieldDescription>
-                The date that the order is desired to be picked up on.
-              </FieldDescription>
-            </Field>
-          </div>
+          <Field>
+            <FieldLabel htmlFor="desired-date">Desired Date</FieldLabel>
+            <Input
+              id="desired-date"
+              type="date"
+              value={desiredDate}
+              onChange={(e) => setDesiredDate(e.target.value)}
+            />
+            <FieldDescription>
+              The date that the order is desired to be picked up on.
+            </FieldDescription>
+          </Field>
         </CardContent>
       </Card>
 
@@ -147,7 +136,7 @@ export default function WholesaleOrderForm() {
                 <Input
                   type="number"
                   min={0}
-                  value={getQuantity(item._id)}
+                  value={orders?.get(item._id) ?? 0}
                   onChange={(e) => updateQuantity(item._id, e.target.value)}
                 />
 
