@@ -15,7 +15,7 @@ import { authClient } from "@/lib/auth-client";
 
 export default function WholesaleOrderForm() {
   const session = authClient.useSession();
-  
+
   const catalog = useQuery(api.itemCatalog.getItems, {});
   const units = useQuery(api.units.getUnits);
 
