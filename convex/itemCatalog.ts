@@ -379,6 +379,9 @@ export const updateItemInventory = mutation({
     currentInventory: v.number(),
   },
   handler: async (ctx, args) => {
+    if (args.currentInventory !== undefined) {
+      throw new ConvexError({ message: "Inventory Error Test" });
+    }
     await requireRole(ctx, ["admin", "employee"]);
     await ctx.db.patch("itemCatalog", args.id, {
       currentInventory: args.currentInventory,
