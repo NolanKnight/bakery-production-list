@@ -94,7 +94,7 @@ export default function RetailOrderPage() {
           </p>
           <p>
             <span className="font-medium">Source:</span>{" "}
-            {order.sourceName ?? "Unknown source"}
+            {order.fulfillmentType ?? "Unknown source"}
           </p>
         </CardContent>
       </Card>

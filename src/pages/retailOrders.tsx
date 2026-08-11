@@ -46,7 +46,9 @@ export default function RetailOrdersPage() {
                     {order.customer.name ?? "Unknown customer"}
                   </TableCell>
                   <TableCell>{order.desiredDate}</TableCell>
-                  <TableCell>{order.sourceName ?? "Unknown source"}</TableCell>
+                  <TableCell>
+                    {order.fulfillmentType ?? "Unknown source"}
+                  </TableCell>
                   <TableCell className="text-right">
                     {order.items.length}
                   </TableCell>
