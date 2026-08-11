@@ -54,6 +54,9 @@ const existingUserValidator = v.object({
     v.literal("client"),
   ),
 });
+const quickSignInLinkValidator = v.object({
+  email: v.string(),
+});
 
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
@@ -303,6 +306,87 @@ export const createInvitation = mutation({
       requestedByName: adminUser.name,
       createdAt: Date.now(),
     });
+  },
+});
+
+export const createQuickSignInLink = mutation({
+  args: {
+    email: v.string(),
+  },
+  returns: v.string(),
+  handler: async (ctx, args) => {
+    const adminUser = await requireAdmin(ctx);
+    const now = Date.now();
+    const token = crypto.randomUUID();
+
+    await ctx.db.insert("quickSignInLinks", {
+      email: normalizeEmail(args.email),
+      token,
+      createdAt: now,
+      expiresAt: now + 7 * 24 * 60 * 60 * 1000,
+      createdByAuthUserId: adminUser._id,
+    });
+
+    return token;
+  },
+});
+
+export const getQuickSignInLink = query({
+  args: {
+    token: v.string(),
+  },
+  returns: v.union(v.null(), quickSignInLinkValidator),
+  handler: async (ctx, args) => {
+    const link = await ctx.db
+      .query("quickSignInLinks")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .first();
+
+    if (!link || link.acceptedAt || link.expiresAt <= Date.now()) {
+      return null;
+    }
+
+    return { email: link.email };
+  },
+});
+
+export const acceptQuickSignInLink = mutation({
+  args: {
+    token: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await getAuthedUser(ctx);
+    const link = await ctx.db
+      .query("quickSignInLinks")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .first();
+
+    if (!link || link.acceptedAt || link.expiresAt <= Date.now()) {
+      throw new ConvexError({
+        message: "This sign-up link is no longer valid.",
+      });
+    }
+    if (normalizeEmail(user.email) !== link.email) {
+      throw new ConvexError({
+        message: "Sign up with the email address assigned to this link.",
+      });
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(link._id, { acceptedAt: now });
+    await ctx.db.insert("accessInvitations", {
+      email: link.email,
+      role: "client",
+      status: "accepted",
+      source: "invite",
+      requestedByAuthUserId: link.createdByAuthUserId,
+      resolvedByAuthUserId: user._id,
+      createdAt: now,
+      resolvedAt: now,
+    });
+
+    return null;
   },
 });
 

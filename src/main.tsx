@@ -24,6 +24,7 @@ import RetailOrdersPage from "./pages/retailOrders";
 import RetailOrderPage from "./pages/retailOrder";
 import LoginPage from "./pages/login";
 import SignupPage from "./pages/signup";
+import QuickSignupPage from "./pages/quickSignup";
 import PendingAccessPage from "./pages/pendingAccess";
 import AdminAccessPage from "./pages/adminAccess";
 import ExistingUsersPage from "./pages/existingUsers";
@@ -129,6 +130,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/quick-signup" element={<QuickSignupPage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
