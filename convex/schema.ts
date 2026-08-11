@@ -91,6 +91,14 @@ export default defineSchema({
     .index("by_email_and_status", ["email", "status"])
     .index("by_status_and_createdAt", ["status", "createdAt"])
     .index("by_source_and_status", ["source", "status"]),
+  quickSignInLinks: defineTable({
+    email: v.string(),
+    token: v.string(),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+    createdByAuthUserId: v.string(),
+    acceptedAt: v.optional(v.number()),
+  }).index("by_token", ["token"]),
   bakerRoles: defineTable({
     name: v.string(),
     normalizedName: v.string(),

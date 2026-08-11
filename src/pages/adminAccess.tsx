@@ -30,12 +30,17 @@ const inviteRoles: AssignableUserRole[] = ["employee", "client"];
 export default function AdminAccessPage() {
   const invitations = useQuery(api.auth.listInvitations, { status: "pending" });
   const createInvitation = useMutation(api.auth.createInvitation);
+  const createQuickSignInLink = useMutation(api.auth.createQuickSignInLink);
   const resolveInvitation = useMutation(api.auth.resolveInvitation);
 
   const [email, setEmail] = useState("");
+  const [quickSignInEmail, setQuickSignInEmail] = useState("");
+  const [quickSignInLink, setQuickSignInLink] = useState("");
   const [role, setRole] = useState<AssignableUserRole>("client");
   const [note, setNote] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [isGeneratingQuickSignInLink, setIsGeneratingQuickSignInLink] =
+    useState(false);
 
   const handleCreate = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -53,6 +58,29 @@ export default function AdminAccessPage() {
       })
       .catch(toastError)
       .finally(() => setIsCreating(false));
+  };
+
+  const handleGenerateQuickSignInLink = async (
+    event: SubmitEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+    setIsGeneratingQuickSignInLink(true);
+    await createQuickSignInLink({ email: quickSignInEmail })
+      .then((token) => {
+        setQuickSignInLink(
+          `${window.location.origin}/quick-signup?token=${encodeURIComponent(token)}`,
+        );
+        toast.success("Sign-up link generated.");
+      })
+      .catch(toastError)
+      .finally(() => setIsGeneratingQuickSignInLink(false));
+  };
+
+  const handleCopyQuickSignInLink = async () => {
+    await navigator.clipboard
+      .writeText(quickSignInLink)
+      .then(() => toast.success("Sign-up link copied."))
+      .catch(() => toast.error("Unable to copy the sign-up link."));
   };
 
   const handleResolve = async (
@@ -74,6 +102,58 @@ export default function AdminAccessPage() {
 
   return (
     <div className="mx-auto max-w-6xl p-6 space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Generate client sign-up link</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={(event) => {
+              void handleGenerateQuickSignInLink(event);
+            }}
+            className="grid gap-4 md:grid-cols-[1fr_auto]"
+          >
+            <Field>
+              <FieldLabel htmlFor="quick-sign-in-email">
+                Client email
+              </FieldLabel>
+              <Input
+                id="quick-sign-in-email"
+                type="email"
+                required
+                value={quickSignInEmail}
+                onChange={(event) => setQuickSignInEmail(event.target.value)}
+              />
+            </Field>
+            <div className="flex items-end">
+              <Button type="submit" disabled={isGeneratingQuickSignInLink}>
+                {isGeneratingQuickSignInLink
+                  ? "Generating..."
+                  : "Generate Sign Up Link"}
+              </Button>
+            </div>
+          </form>
+          {quickSignInLink ? (
+            <div className="mt-4 flex gap-2">
+              <Input
+                readOnly
+                value={quickSignInLink}
+                aria-label="Sign-up link"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  void handleCopyQuickSignInLink();
+                }}
+              >
+                Copy link
+              </Button>
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Send invitation</CardTitle>

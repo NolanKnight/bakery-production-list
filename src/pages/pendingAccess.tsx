@@ -1,4 +1,4 @@
-import { SubmitEvent, useMemo, useState } from "react";
+import { SubmitEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { authClient } from "@/lib/auth-client";
@@ -28,6 +28,19 @@ export default function PendingAccessPage() {
   const access = useQuery(api.auth.getCurrentUserRole);
   const requestAccess = useMutation(api.auth.requestAccess);
   const syncRoleFromInvitations = useMutation(api.auth.syncRoleFromInvitations);
+  const acceptQuickSignInLink = useMutation(api.auth.acceptQuickSignInLink);
+
+  useEffect(() => {
+    const token = window.sessionStorage.getItem("quick-sign-in-token");
+    if (!token) return;
+
+    void acceptQuickSignInLink({ token })
+      .then(() => {
+        window.sessionStorage.removeItem("quick-sign-in-token");
+        toast.success("Your client access has been activated.");
+      })
+      .catch(toastError);
+  }, [acceptQuickSignInLink]);
 
   const pendingMessage = useMemo(() => {
     if (!access) return "Loading access status...";
