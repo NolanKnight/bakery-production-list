@@ -26,6 +26,7 @@ import LoginPage from "./pages/login";
 import SignupPage from "./pages/signup";
 import PendingAccessPage from "./pages/pendingAccess";
 import AdminAccessPage from "./pages/adminAccess";
+import ExistingUsersPage from "./pages/existingUsers";
 import BakerRolesPage from "./pages/bakerRoles";
 import AccountPage from "./pages/account";
 import { api } from "../convex/_generated/api";
@@ -92,6 +93,11 @@ const authenticatedRoutes: {
   {
     path: "/admin/access",
     element: <AdminAccessPage />,
+    allowedRoles: ["admin"] as const,
+  },
+  {
+    path: "/admin/users",
+    element: <ExistingUsersPage />,
     allowedRoles: ["admin"] as const,
   },
   {

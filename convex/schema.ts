@@ -87,6 +87,7 @@ export default defineSchema({
     createdAt: v.number(),
     resolvedAt: v.optional(v.number()),
   })
+    .index("by_email", ["email"])
     .index("by_email_and_status", ["email", "status"])
     .index("by_status_and_createdAt", ["status", "createdAt"])
     .index("by_source_and_status", ["source", "status"]),

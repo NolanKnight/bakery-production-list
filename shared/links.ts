@@ -22,9 +22,13 @@ export const ItemCatalog: Link = {
   name: "Item Catalog",
   path: "/item-catalog",
 };
-export const AccessManagement: Link = {
-  name: "Access Management",
+export const PendingUsers: Link = {
+  name: "Pending Users",
   path: "/admin/access",
+};
+export const ExistingUsers: Link = {
+  name: "Existing Users",
+  path: "/admin/users",
 };
 export const BakerRoles: Link = {
   name: "Baker Roles",
@@ -49,7 +53,7 @@ export const Navigation = [
   Production,
   {
     name: "User Management",
-    links: [AccessManagement, BakerRoles],
+    links: [PendingUsers, ExistingUsers, BakerRoles],
   },
   {
     name: "Item Management",

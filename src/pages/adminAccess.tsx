@@ -1,7 +1,7 @@
 import { SubmitEvent, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Id } from "../../convex/_generated/dataModel";
+import { Doc } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -56,13 +56,17 @@ export default function AdminAccessPage() {
   };
 
   const handleResolve = async (
-    invitationId: Id<"accessInvitations">,
+    invitation: Doc<"accessInvitations">,
     approve: boolean,
   ) => {
-    await resolveInvitation({ invitationId, approve })
+    await resolveInvitation({ invitationId: invitation._id, approve })
       .then(() =>
         toast.success(
-          approve ? "Approved invitation." : "Declined invitation.",
+          approve
+            ? "Approved request."
+            : invitation.source === "request"
+              ? "Revoked invitation."
+              : "Declined request.",
         ),
       )
       .catch(toastError);
@@ -148,7 +152,7 @@ export default function AdminAccessPage() {
                     {invitation.source === "request" ? (
                       <Button
                         size="sm"
-                        onClick={() => handleResolve(invitation._id, true)}
+                        onClick={() => handleResolve(invitation, true)}
                       >
                         Approve
                       </Button>
@@ -156,7 +160,7 @@ export default function AdminAccessPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleResolve(invitation._id, false)}
+                      onClick={() => handleResolve(invitation, false)}
                     >
                       {invitation.source === "request" ? "Decline" : "Revoke"}
                     </Button>
