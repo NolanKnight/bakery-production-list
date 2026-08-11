@@ -52,7 +52,7 @@ export default defineSchema({
     squareOrderId: v.string(),
     desiredDate: v.string(),
     createdAt: v.number(),
-    sourceName: v.optional(v.string()),
+    fulfillmentType: v.optional(v.string()),
     customer: v.object({
       name: v.optional(v.string()),
       email: v.optional(v.string()),

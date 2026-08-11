@@ -13,7 +13,7 @@ import { v } from "convex/values";
 const SQUARE_API_URL = process.env.SQUARE_API_URL + "/v2/orders";
 const SQUARE_API_VERSION = "2026-07-22";
 const ONLINE_ORDER_EVENT_TYPE = "order.created";
-const IN_PERSON_SOURCE_NAME = "square point of sale";
+const IN_PERSON_SOURCE_NAME = "IN_STORE";
 
 type JsonRecord = Record<string, unknown>;
 type SquareOrderLineItem = {
@@ -57,14 +57,17 @@ const extractOrderId = (payload: unknown): string | null => {
 const getEventType = (payload: unknown): string | null =>
   getString(payload, "type") ?? getString(payload, "event_type");
 
-const getSourceName = (order: unknown): string | null => {
-  const source = getRecord(order, "source");
-  return getString(source, "name");
+const getFulfillmentType = (order: unknown): string | null => {
+  return isRecord(order) && Array.isArray(order.fulfillments)
+    ? getString(order.fulfillments[0], "type")
+    : "NOT_FOUND";
 };
 
 const isInPersonOrder = (order: unknown) => {
-  const sourceName = getSourceName(order)?.trim().toLowerCase();
-  return sourceName === IN_PERSON_SOURCE_NAME;
+  const fulfillmentType = getFulfillmentType(order)?.trim().toLowerCase();
+  return (
+    fulfillmentType === IN_PERSON_SOURCE_NAME || fulfillmentType === "NOT_FOUND"
+  );
 };
 
 const asDateString = (isoValue: string | null) => {
@@ -201,7 +204,7 @@ export const upsertRetailOrderFromSquare = internalMutation({
     squareOrderId: v.string(),
     desiredDate: v.string(),
     createdAt: v.number(),
-    sourceName: v.optional(v.string()),
+    fulfillmentType: v.optional(v.string()),
     customer: v.object({
       name: v.optional(v.string()),
       email: v.optional(v.string()),
@@ -225,7 +228,7 @@ export const upsertRetailOrderFromSquare = internalMutation({
     if (existing) {
       await ctx.db.patch(existing._id, {
         desiredDate: args.desiredDate,
-        sourceName: args.sourceName,
+        fulfillmentType: args.fulfillmentType,
         customer: args.customer,
         items: args.items,
       });
@@ -320,7 +323,7 @@ export const handleSquareOrderCreated = async (
     squareOrderId: orderId,
     desiredDate: extractDesiredDate(order),
     createdAt: Date.now(),
-    sourceName: getSourceName(order) ?? undefined,
+    fulfillmentType: getFulfillmentType(order) ?? undefined,
     customer: extractCustomer(order),
     items: [...itemTotals.entries()].map(([itemId, quantity]) => ({
       itemId,
