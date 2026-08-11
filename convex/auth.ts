@@ -8,6 +8,11 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "./_generated/server";
+import {
+  paginationResultValidator,
+  paginationOptsValidator,
+  type PaginationResult,
+} from "convex/server";
 import { betterAuth } from "better-auth/minimal";
 import { ConvexError, v } from "convex/values";
 import type { UserRoleValue } from "../shared/userRole";
@@ -34,6 +39,21 @@ const invitationStatusValidator = v.union(
   v.literal("accepted"),
   v.literal("declined"),
 );
+const manageableRoleValidator = v.union(
+  v.literal("employee"),
+  v.literal("client"),
+);
+const existingUserValidator = v.object({
+  id: v.string(),
+  name: v.string(),
+  email: v.string(),
+  role: v.union(
+    v.literal("none"),
+    v.literal("admin"),
+    v.literal("employee"),
+    v.literal("client"),
+  ),
+});
 
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
@@ -332,5 +352,162 @@ export const resolveInvitation = mutation({
       resolvedAt: Date.now(),
       resolvedByAuthUserId: adminUser._id,
     });
+  },
+});
+
+export const listExistingUsers = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    search: v.string(),
+  },
+  returns: paginationResultValidator(existingUserValidator),
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    const search = args.search.trim();
+    const users: PaginationResult<{
+      _id: string;
+      name: string;
+      email: string;
+    }> = await ctx.runQuery(components.betterAuth.adapter.findMany, {
+      model: "user",
+      where:
+        search === ""
+          ? undefined
+          : [
+              {
+                field: "name",
+                operator: "contains",
+                value: search,
+                connector: "OR",
+              },
+              {
+                field: "email",
+                operator: "contains",
+                value: search,
+              },
+            ],
+      sortBy: { field: "name", direction: "asc" },
+      paginationOpts: args.paginationOpts,
+    });
+
+    return {
+      ...users,
+      page: await Promise.all(
+        users.page.map(async (user) => ({
+          id: String(user._id),
+          name: user.name,
+          email: user.email,
+          role: await resolveRoleForEmail(ctx, user.email),
+        })),
+      ),
+    };
+  },
+});
+
+export const updateExistingUserRole = mutation({
+  args: {
+    userId: v.string(),
+    role: manageableRoleValidator,
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const adminUser = await requireAdmin(ctx);
+    const user = await ctx.runQuery(components.betterAuth.adapter.findOne, {
+      model: "user",
+      where: [{ field: "_id", value: args.userId }],
+    });
+    if (!user) {
+      throw new ConvexError({ message: "User not found." });
+    }
+
+    const currentRole = await resolveRoleForEmail(ctx, user.email);
+    if (currentRole === "admin") {
+      throw new ConvexError({ message: "Admin roles cannot be changed." });
+    }
+
+    const acceptedInvitations = await ctx.db
+      .query("accessInvitations")
+      .withIndex("by_email_and_status", (q) =>
+        q.eq("email", normalizeEmail(user.email)).eq("status", "accepted"),
+      )
+      .collect();
+    const latestInvitation = acceptedInvitations.sort(
+      (a, b) => (b.resolvedAt ?? b.createdAt) - (a.resolvedAt ?? a.createdAt),
+    )[0];
+
+    if (latestInvitation) {
+      await ctx.db.patch(latestInvitation._id, {
+        role: args.role,
+        resolvedAt: Date.now(),
+        resolvedByAuthUserId: adminUser._id,
+      });
+    } else {
+      await ctx.db.insert("accessInvitations", {
+        email: normalizeEmail(user.email),
+        role: args.role,
+        status: "accepted",
+        source: "invite",
+        requestedByAuthUserId: adminUser._id,
+        requestedByName: adminUser.name,
+        resolvedByAuthUserId: adminUser._id,
+        createdAt: Date.now(),
+        resolvedAt: Date.now(),
+      });
+    }
+
+    return null;
+  },
+});
+
+export const removeExistingUser = mutation({
+  args: {
+    userId: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const user = await ctx.runQuery(components.betterAuth.adapter.findOne, {
+      model: "user",
+      where: [{ field: "_id", value: args.userId }],
+    });
+    if (!user) {
+      throw new ConvexError({ message: "User not found." });
+    }
+
+    if ((await resolveRoleForEmail(ctx, user.email)) === "admin") {
+      throw new ConvexError({ message: "Admin users cannot be removed." });
+    }
+
+    const invitations = await ctx.db
+      .query("accessInvitations")
+      .withIndex("by_email", (q) => q.eq("email", normalizeEmail(user.email)))
+      .collect();
+    await Promise.all(
+      invitations.map((invitation) => ctx.db.delete(invitation._id)),
+    );
+
+    await ctx.runMutation(components.betterAuth.adapter.deleteMany, {
+      input: {
+        model: "session",
+        where: [{ field: "userId", value: args.userId }],
+      },
+      paginationOpts: { cursor: null, numItems: 100 },
+    });
+    await ctx.runMutation(components.betterAuth.adapter.deleteMany, {
+      input: {
+        model: "account",
+        where: [{ field: "userId", value: args.userId }],
+      },
+      paginationOpts: { cursor: null, numItems: 100 },
+    });
+    await ctx.runMutation(components.betterAuth.adapter.deleteOne, {
+      input: {
+        model: "user",
+        where: [{ field: "_id", value: args.userId }],
+      },
+    });
+
+    return null;
   },
 });

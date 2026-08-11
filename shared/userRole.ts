@@ -1,6 +1,7 @@
 import {
   Account,
-  AccessManagement,
+  ExistingUsers,
+  PendingUsers,
   BakerRoles,
   ItemCatalog,
   Inventory,
@@ -33,14 +34,15 @@ export default class UserRole {
     RetailOrders,
     Inventory,
     ItemCatalog,
-    AccessManagement,
+    PendingUsers,
+    ExistingUsers,
     BakerRoles,
     Account,
   ]);
   public static readonly Employee: UserRole = new UserRole(
     "employee",
     "Employee",
-    [Inventory, Production, Account],
+    [Production, Inventory, Account],
   );
   public static readonly Client: UserRole = new UserRole("client", "Client", [
     Dashboard,
