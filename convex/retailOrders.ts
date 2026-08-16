@@ -73,89 +73,89 @@ const isInPersonOrder = (order: unknown) => {
   );
 };
 
-const asDateString = (isoValue: string | null) => {
-  if (!isoValue) return null;
-  if (isoValue.length < 10) return null;
-  return isoValue.slice(0, 10);
-};
+// const asDateString = (isoValue: string | null) => {
+//   if (!isoValue) return null;
+//   if (isoValue.length < 10) return null;
+//   return isoValue.slice(0, 10);
+// };
 
-const extractDesiredDate = (order: unknown): string => {
-  const fulfillments =
-    isRecord(order) && Array.isArray(order.fulfillments)
-      ? order.fulfillments
-      : [];
+// const extractDesiredDate = (order: unknown): string => {
+//   const fulfillments =
+//     isRecord(order) && Array.isArray(order.fulfillments)
+//       ? order.fulfillments
+//       : [];
 
-  for (const fulfillment of fulfillments) {
-    if (!isRecord(fulfillment)) continue;
+//   for (const fulfillment of fulfillments) {
+//     if (!isRecord(fulfillment)) continue;
 
-    const pickupAt = asDateString(
-      getString(getRecord(fulfillment, "pickup_details"), "pickup_at"),
-    );
-    if (pickupAt) return pickupAt;
+//     const pickupAt = asDateString(
+//       getString(getRecord(fulfillment, "pickup_details"), "pickup_at"),
+//     );
+//     if (pickupAt) return pickupAt;
 
-    const deliverAt = asDateString(
-      getString(getRecord(fulfillment, "delivery_details"), "deliver_at"),
-    );
-    if (deliverAt) return deliverAt;
+//     const deliverAt = asDateString(
+//       getString(getRecord(fulfillment, "delivery_details"), "deliver_at"),
+//     );
+//     if (deliverAt) return deliverAt;
 
-    const shipAt = asDateString(
-      getString(
-        getRecord(fulfillment, "shipment_details"),
-        "expected_shipped_at",
-      ),
-    );
-    if (shipAt) return shipAt;
-  }
+//     const shipAt = asDateString(
+//       getString(
+//         getRecord(fulfillment, "shipment_details"),
+//         "expected_shipped_at",
+//       ),
+//     );
+//     if (shipAt) return shipAt;
+//   }
 
-  return (
-    asDateString(getString(order, "created_at")) ??
-    new Date().toISOString().slice(0, 10)
-  );
-};
+//   return (
+//     asDateString(getString(order, "created_at")) ??
+//     new Date().toISOString().slice(0, 10)
+//   );
+// };
 
-const extractCustomer = (
-  order: unknown,
-): {
-  name?: string;
-  email?: string;
-  phone?: string;
-} => {
-  const fulfillments =
-    isRecord(order) && Array.isArray(order.fulfillments)
-      ? order.fulfillments
-      : [];
+// const extractCustomer = (
+//   order: unknown,
+// ): {
+//   name?: string;
+//   email?: string;
+//   phone?: string;
+// } => {
+//   const fulfillments =
+//     isRecord(order) && Array.isArray(order.fulfillments)
+//       ? order.fulfillments
+//       : [];
 
-  for (const fulfillment of fulfillments) {
-    if (!isRecord(fulfillment)) continue;
+//   for (const fulfillment of fulfillments) {
+//     if (!isRecord(fulfillment)) continue;
 
-    const pickupRecipient = getRecord(
-      getRecord(fulfillment, "pickup_details"),
-      "recipient",
-    );
+//     const pickupRecipient = getRecord(
+//       getRecord(fulfillment, "pickup_details"),
+//       "recipient",
+//     );
 
-    if (pickupRecipient) {
-      return {
-        name: getString(pickupRecipient, "display_name") ?? undefined,
-        email: getString(pickupRecipient, "email_address") ?? undefined,
-        phone: getString(pickupRecipient, "phone_number") ?? undefined,
-      };
-    }
+//     if (pickupRecipient) {
+//       return {
+//         name: getString(pickupRecipient, "display_name") ?? undefined,
+//         email: getString(pickupRecipient, "email_address") ?? undefined,
+//         phone: getString(pickupRecipient, "phone_number") ?? undefined,
+//       };
+//     }
 
-    const deliveryRecipient = getRecord(
-      getRecord(fulfillment, "delivery_details"),
-      "recipient",
-    );
-    if (deliveryRecipient) {
-      return {
-        name: getString(deliveryRecipient, "display_name") ?? undefined,
-        email: getString(deliveryRecipient, "email_address") ?? undefined,
-        phone: getString(deliveryRecipient, "phone_number") ?? undefined,
-      };
-    }
-  }
+//     const deliveryRecipient = getRecord(
+//       getRecord(fulfillment, "delivery_details"),
+//       "recipient",
+//     );
+//     if (deliveryRecipient) {
+//       return {
+//         name: getString(deliveryRecipient, "display_name") ?? undefined,
+//         email: getString(deliveryRecipient, "email_address") ?? undefined,
+//         phone: getString(deliveryRecipient, "phone_number") ?? undefined,
+//       };
+//     }
+//   }
 
-  return {};
-};
+//   return {};
+// };
 
 const extractLineItems = (order: unknown): SquareOrderLineItem[] => {
   if (!isRecord(order)) {
@@ -329,17 +329,17 @@ export const handleSquareOrderCreated = async (
     return new Response("No mapped retail items on order", { status: 200 });
   }
 
-  await ctx.runMutation(internal.retailOrders.upsertRetailOrderFromSquare, {
-    squareOrderId: orderId,
-    desiredDate: extractDesiredDate(order),
-    createdAt: Date.now(),
-    fulfillmentType: getFulfillmentType(order) ?? undefined,
-    customer: extractCustomer(order),
-    items: [...itemTotals.entries()].map(([itemId, quantity]) => ({
-      itemId,
-      quantity,
-    })),
-  });
+  // await ctx.runMutation(internal.retailOrders.upsertRetailOrderFromSquare, {
+  //   squareOrderId: orderId,
+  //   desiredDate: extractDesiredDate(order),
+  //   createdAt: Date.now(),
+  //   fulfillmentType: getFulfillmentType(order) ?? undefined,
+  //   customer: extractCustomer(order),
+  //   items: [...itemTotals.entries()].map(([itemId, quantity]) => ({
+  //     itemId,
+  //     quantity,
+  //   })),
+  // });
 
   return new Response("Retail order stored", { status: 200 });
 };
