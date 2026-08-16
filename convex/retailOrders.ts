@@ -64,7 +64,10 @@ const getFulfillmentType = (order: unknown): string | null => {
 };
 
 const isInPersonOrder = (order: unknown) => {
+  console.log("getFulfillmentType", getFulfillmentType(order));
   const fulfillmentType = getFulfillmentType(order)?.trim().toLowerCase();
+  console.log("fulfillmentType", fulfillmentType);
+  console.log("in person source name", IN_PERSON_SOURCE_NAME);
   return (
     fulfillmentType === IN_PERSON_SOURCE_NAME || fulfillmentType === "NOT_FOUND"
   );
@@ -286,8 +289,15 @@ export const handleSquareOrderCreated = async (
     return new Response("Square response missing order", { status: 502 });
   }
 
-  if (isInPersonOrder(order)) {
+  const inPersonOrder = isInPersonOrder(order);
+
+  console.log("is in person order", inPersonOrder);
+
+  if (inPersonOrder) {
+    console.log("return for is in person order");
     return new Response("Ignored in-person order", { status: 200 });
+  } else {
+    console.log("did not return for in person order");
   }
 
   const catalogLookup: { itemId: Id<"itemCatalog">; squareItemId: string }[] =
