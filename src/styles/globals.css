@@ -223,3 +223,49 @@ h5 {
   font-weight: 300;
   text-transform: uppercase;
 }
+
+.daily-order-chevron {
+  transition: transform 150ms ease;
+}
+
+.daily-order-details[open] .daily-order-chevron {
+  transform: rotate(180deg);
+}
+
+@media print {
+  body[data-print-section] .daily-print-section {
+    display: none !important;
+  }
+
+  body[data-print-section="wholesale"]
+    .daily-print-section[data-print-section="wholesale"],
+  body[data-print-section="retail"]
+    .daily-print-section[data-print-section="retail"],
+  body[data-print-section="production"]
+    .daily-print-section[data-print-section="production"] {
+    display: block !important;
+  }
+
+  body[data-print-section] .daily-screen-only {
+    display: none !important;
+  }
+
+  body[data-print-section] .daily-order-print-page {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  body[data-print-section] .daily-order-print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  body[data-print-section] [data-section-print-only] {
+    display: block !important;
+  }
+
+  body[data-print-section="wholesale"] .daily-orders-print-hidden,
+  body[data-print-section="retail"] .daily-orders-print-hidden {
+    display: none !important;
+  }
+}

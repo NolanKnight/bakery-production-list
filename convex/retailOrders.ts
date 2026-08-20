@@ -21,6 +21,26 @@ type SquareOrderLineItem = {
   quantity?: unknown;
 };
 
+const retailOrderValidator = v.object({
+  _id: v.id("retailOrders"),
+  _creationTime: v.number(),
+  squareOrderId: v.string(),
+  desiredDate: v.string(),
+  createdAt: v.number(),
+  fulfillmentType: v.optional(v.string()),
+  customer: v.object({
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+  }),
+  items: v.array(
+    v.object({
+      itemId: v.id("itemCatalog"),
+      quantity: v.number(),
+    }),
+  ),
+});
+
 const isRecord = (value: unknown): value is JsonRecord =>
   typeof value === "object" && value !== null;
 
@@ -174,6 +194,20 @@ export const getRetailOrders = query({
   handler: async (ctx) => {
     await requireRole(ctx, ["admin"]);
     return await ctx.db.query("retailOrders").collect();
+  },
+});
+
+export const getRetailOrdersForDate = query({
+  args: {
+    date: v.string(),
+  },
+  returns: v.array(retailOrderValidator),
+  handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin"]);
+    return await ctx.db
+      .query("retailOrders")
+      .withIndex("by_date", (q) => q.eq("desiredDate", args.date))
+      .collect();
   },
 });
 
