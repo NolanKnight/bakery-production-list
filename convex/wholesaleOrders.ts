@@ -47,7 +47,7 @@ export const createWholesaleOrder = mutation({
 export const getWholesaleOrders = query({
   args: {},
   handler: async (ctx) => {
-    await requireRole(ctx, ["admin"]);
+    await requireRole(ctx, ["admin", "employee"]);
     return await ctx.db.query("wholesaleOrders").collect();
   },
 });
@@ -58,7 +58,7 @@ export const getWholesaleOrdersForDate = query({
   },
   returns: v.array(wholesaleOrderValidator),
   handler: async (ctx, args) => {
-    await requireRole(ctx, ["admin"]);
+    await requireRole(ctx, ["admin", "employee"]);
     return await ctx.db
       .query("wholesaleOrders")
       .withIndex("by_date", (q) => q.eq("desiredDate", args.date))
@@ -84,7 +84,11 @@ export const getWholesaleOrder = query({
     orderId: v.id("wholesaleOrders"),
   },
   handler: async (ctx, args) => {
-    const { user, role } = await requireRole(ctx, ["admin", "client"]);
+    const { user, role } = await requireRole(ctx, [
+      "admin",
+      "client",
+      "employee",
+    ]);
     const order = await ctx.db.get(args.orderId);
 
     if (

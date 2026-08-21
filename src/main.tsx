@@ -118,6 +118,9 @@ function AppRoutes() {
   const session = authClient.useSession();
   const roleState = useQuery(api.auth.getCurrentUserRole);
 
+  console.log("session pending", session.isPending);
+  console.log("roleState", roleState);
+
   if (session.isPending || roleState === undefined) {
     return (
       <div className="w-full h-screen flex bg-blue-200 place-items-center text-center">
@@ -147,7 +150,7 @@ function AppRoutes() {
     );
   }
 
-  const defaultRoute = userRole.links[0]?.path ?? "/production";
+  const defaultRoute = userRole.links[0].path;
 
   return (
     <Layout userRole={userRole}>
