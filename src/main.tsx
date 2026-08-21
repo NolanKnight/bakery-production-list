@@ -4,6 +4,7 @@ import { JSX, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useQuery } from "convex/react";
+import { Analytics } from "@vercel/analytics/react";
 
 import { ConvexReactClient } from "convex/react";
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
@@ -197,6 +198,7 @@ createRoot(document.getElementById("root")!, {
         <BrowserRouter>
           <AppRoutes />
           <Toaster position="top-center" />
+          <Analytics />
         </BrowserRouter>
       </ConvexBetterAuthProvider>
     </Sentry.ErrorBoundary>

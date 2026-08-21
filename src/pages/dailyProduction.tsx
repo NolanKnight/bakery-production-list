@@ -229,7 +229,6 @@ export default function DailyProductionPage() {
                       <div className="border-t p-4">
                         <Link
                           to={`/wholesale-order/${order._id}`}
-                          // className="mb-4 inline-block text-sm underline underline-offset-4 print:hidden"
                           className={cn(
                             buttonVariants({ variant: "link", size: "lg" }),
                             "print:hidden pl-2.5",
