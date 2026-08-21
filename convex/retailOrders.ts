@@ -192,7 +192,7 @@ const extractLineItems = (order: unknown): SquareOrderLineItem[] => {
 export const getRetailOrders = query({
   args: {},
   handler: async (ctx) => {
-    await requireRole(ctx, ["admin"]);
+    await requireRole(ctx, ["admin", "employee"]);
     return await ctx.db.query("retailOrders").collect();
   },
 });
@@ -203,7 +203,7 @@ export const getRetailOrdersForDate = query({
   },
   returns: v.array(retailOrderValidator),
   handler: async (ctx, args) => {
-    await requireRole(ctx, ["admin"]);
+    await requireRole(ctx, ["admin", "employee"]);
     return await ctx.db
       .query("retailOrders")
       .withIndex("by_date", (q) => q.eq("desiredDate", args.date))
@@ -216,7 +216,7 @@ export const getRetailOrder = query({
     orderId: v.id("retailOrders"),
   },
   handler: async (ctx, args) => {
-    await requireRole(ctx, ["admin"]);
+    await requireRole(ctx, ["admin", "employee"]);
     return await ctx.db.get(args.orderId);
   },
 });
