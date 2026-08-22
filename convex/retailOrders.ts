@@ -5,10 +5,11 @@ import {
   httpAction,
   internalMutation,
   internalQuery,
+  mutation,
   query,
 } from "./_generated/server";
 import { requireRole } from "./authorization";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 
 const SQUARE_API_URL = process.env.SQUARE_API_URL + "/v2/orders";
 const SQUARE_API_VERSION = "2026-07-22";
@@ -27,6 +28,7 @@ const retailOrderValidator = v.object({
   squareOrderId: v.string(),
   desiredDate: v.string(),
   createdAt: v.number(),
+  cancelledAt: v.optional(v.number()),
   fulfillmentType: v.optional(v.string()),
   customer: v.object({
     name: v.optional(v.string()),
@@ -204,10 +206,11 @@ export const getRetailOrdersForDate = query({
   returns: v.array(retailOrderValidator),
   handler: async (ctx, args) => {
     await requireRole(ctx, ["admin", "employee"]);
-    return await ctx.db
+    const orders = await ctx.db
       .query("retailOrders")
       .withIndex("by_date", (q) => q.eq("desiredDate", args.date))
       .collect();
+    return orders.filter((order) => order.cancelledAt === undefined);
   },
 });
 
@@ -218,6 +221,26 @@ export const getRetailOrder = query({
   handler: async (ctx, args) => {
     await requireRole(ctx, ["admin", "employee"]);
     return await ctx.db.get(args.orderId);
+  },
+});
+
+export const cancelRetailOrder = mutation({
+  args: {
+    orderId: v.id("retailOrders"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin"]);
+    const order = await ctx.db.get(args.orderId);
+    if (!order) {
+      throw new ConvexError({ message: "Order not found." });
+    }
+    if (order.cancelledAt !== undefined) {
+      throw new ConvexError({ message: "Order has already been cancelled." });
+    }
+
+    await ctx.db.patch(order._id, { cancelledAt: Date.now() });
+    return null;
   },
 });
 

@@ -44,6 +44,11 @@ export default function ClientDashboardPage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   Submitted {new Date(order.createdAt).toLocaleDateString()}
                 </p>
+                {order.cancelledAt !== undefined && (
+                  <p className="mt-1 text-sm font-medium text-destructive">
+                    Cancelled
+                  </p>
+                )}
               </button>
             ))
           )}
