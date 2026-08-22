@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { Link, useParams } from "react-router-dom";
 import { Id } from "../../convex/_generated/dataModel";
 
@@ -13,9 +13,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MoveLeft } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toastError } from "@/lib/errors";
+import { toast } from "sonner";
 
 export default function RetailOrderPage() {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +40,8 @@ export default function RetailOrderPage() {
   );
   const catalog = useQuery(api.itemCatalog.getItems, { includeInactive: true });
   const units = useQuery(api.units.getUnits);
+  const roleState = useQuery(api.auth.getCurrentUserRole);
+  const cancelOrder = useMutation(api.retailOrders.cancelRetailOrder);
 
   const itemLookup = useMemo(() => {
     const lookup = new Map<
@@ -48,7 +63,7 @@ export default function RetailOrderPage() {
     return lookup;
   }, [catalog, units]);
 
-  if (!catalog || !units) return undefined;
+  if (!catalog || !units || roleState === undefined) return undefined;
 
   if (!order) {
     return (
@@ -58,6 +73,14 @@ export default function RetailOrderPage() {
       </div>
     );
   }
+  const canCancel =
+    roleState.role === "admin" && order.cancelledAt === undefined;
+
+  const handleCancel = () => {
+    void cancelOrder({ orderId: order._id })
+      .then(() => toast.success("Order cancelled."))
+      .catch(toastError);
+  };
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
@@ -72,7 +95,33 @@ export default function RetailOrderPage() {
           <MoveLeft />
           Back to orders
         </Link>
-        <h3>Retail Order</h3>
+        <div className="flex w-full items-center justify-between gap-4">
+          <h3>Retail Order</h3>
+          {canCancel && (
+            <AlertDialog>
+              <AlertDialogTrigger render={<Button variant="destructive" />}>
+                Cancel order
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Cancel this order?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This order will no longer appear in daily production.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Keep order</AlertDialogCancel>
+                  <AlertDialogAction
+                    variant="destructive"
+                    onClick={handleCancel}
+                  >
+                    Cancel order
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       </div>
 
       <Card>
@@ -96,6 +145,11 @@ export default function RetailOrderPage() {
             <span className="font-medium">Source:</span>{" "}
             {order.fulfillmentType ?? "Unknown source"}
           </p>
+          {order.cancelledAt !== undefined && (
+            <p className="font-medium text-destructive">
+              This order is cancelled.
+            </p>
+          )}
         </CardContent>
       </Card>
 

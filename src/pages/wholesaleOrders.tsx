@@ -38,14 +38,36 @@ export default function WholesaleOrdersPage() {
               {orders.map((order) => (
                 <TableRow
                   key={order._id}
-                  className="cursor-pointer"
+                  className={`cursor-pointer ${order.cancelledAt !== undefined && "text-muted-foreground"}`}
                   onClick={() => navigate(`/wholesale-order/${order._id}`)}
                 >
-                  <TableCell>{order.clientName}</TableCell>
-                  <TableCell>{order.email}</TableCell>
-                  <TableCell>{order.desiredDate}</TableCell>
+                  <TableCell>
+                    <div className="grid gap-2">
+                      {order.cancelledAt !== undefined && (
+                        <span className="text-sm font-medium text-destructive">
+                          Cancelled
+                        </span>
+                      )}
+                      <span>{order.clientName}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="grid gap-2">
+                      {order.cancelledAt !== undefined && <br />}
+                      <span>{order.email}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="grid gap-2">
+                      {order.cancelledAt !== undefined && <br />}
+                      <span>{order.desiredDate}</span>
+                    </div>
+                  </TableCell>
                   <TableCell className="text-right">
-                    {order.items.length}
+                    <div className="grid gap-2">
+                      {order.cancelledAt !== undefined && <br />}
+                      <span>{order.items.length}</span>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

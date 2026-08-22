@@ -43,7 +43,14 @@ export default function RetailOrdersPage() {
                   }}
                 >
                   <TableCell>
-                    {order.customer.name ?? "Unknown customer"}
+                    <div className="flex items-center gap-2">
+                      <span>{order.customer.name ?? "Unknown customer"}</span>
+                      {order.cancelledAt !== undefined && (
+                        <span className="text-sm font-medium text-destructive">
+                          Cancelled
+                        </span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>{order.desiredDate}</TableCell>
                   <TableCell>

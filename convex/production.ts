@@ -18,14 +18,18 @@ export const getDailyProduction = query({
     const catalog = await getCatalog(ctx);
     const weekday = getWeekdayNameFromDate(args.date);
 
-    const orders = await ctx.db
-      .query("wholesaleOrders")
-      .withIndex("by_date", (q) => q.eq("desiredDate", args.date))
-      .collect();
-    const retailOrders = await ctx.db
-      .query("retailOrders")
-      .withIndex("by_date", (q) => q.eq("desiredDate", args.date))
-      .collect();
+    const orders = (
+      await ctx.db
+        .query("wholesaleOrders")
+        .withIndex("by_date", (q) => q.eq("desiredDate", args.date))
+        .collect()
+    ).filter((order) => order.cancelledAt === undefined);
+    const retailOrders = (
+      await ctx.db
+        .query("retailOrders")
+        .withIndex("by_date", (q) => q.eq("desiredDate", args.date))
+        .collect()
+    ).filter((order) => order.cancelledAt === undefined);
 
     const overrides = await ctx.db
       .query("productionOverrides")

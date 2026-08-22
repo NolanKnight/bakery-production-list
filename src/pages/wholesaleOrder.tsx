@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { Link, useParams } from "react-router-dom";
 import { Id } from "../../convex/_generated/dataModel";
 
@@ -17,6 +17,19 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MoveLeft } from "lucide-react";
 import Loading from "@/components/loading";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toastError } from "@/lib/errors";
+import { toast } from "sonner";
 
 export default function WholesaleOrderPage() {
   const { id } = useParams<{ id: string }>();
@@ -29,6 +42,7 @@ export default function WholesaleOrderPage() {
   const catalog = useQuery(api.itemCatalog.getItems, { includeInactive: true });
   const units = useQuery(api.units.getUnits);
   const roleState = useQuery(api.auth.getCurrentUserRole);
+  const cancelOrder = useMutation(api.wholesaleOrders.cancelWholesaleOrder);
 
   const itemLookup = useMemo(() => {
     const lookup = new Map<
@@ -63,6 +77,16 @@ export default function WholesaleOrderPage() {
       </div>
     );
   }
+  const canCancel =
+    (roleState.role === "admin" || roleState.role === "client") &&
+    order.cancelledAt === undefined;
+  const canPrint = roleState.role === "admin" || roleState.role === "employee";
+
+  const handleCancel = () => {
+    void cancelOrder({ orderId: order._id })
+      .then(() => toast.success("Order cancelled."))
+      .catch(toastError);
+  };
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
@@ -83,14 +107,40 @@ export default function WholesaleOrderPage() {
             </Link>
             <h3>Wholesale Order</h3>
           </div>
-          <Button variant="outline" onClick={() => window.print()}>
-            Print
-          </Button>
+          {canPrint && (
+            <Button variant="outline" onClick={() => window.print()}>
+              Print
+            </Button>
+          )}
         </div>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between gap-4">
             <CardTitle>{order.clientName}</CardTitle>
+            {canCancel && (
+              <AlertDialog>
+                <AlertDialogTrigger render={<Button variant="destructive" />}>
+                  Cancel order
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Cancel this order?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This order will no longer appear in daily production.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Keep order</AlertDialogCancel>
+                    <AlertDialogAction
+                      variant="destructive"
+                      onClick={handleCancel}
+                    >
+                      Cancel order
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </CardHeader>
           <CardContent className="space-y-2">
             <p>
@@ -104,6 +154,11 @@ export default function WholesaleOrderPage() {
               <span className="font-medium">Submitted:</span>{" "}
               {new Date(order.createdAt).toLocaleString()}
             </p>
+            {order.cancelledAt !== undefined && (
+              <p className="font-medium text-destructive">
+                This order is cancelled.
+              </p>
+            )}
           </CardContent>
         </Card>
 

@@ -41,6 +41,7 @@ export default defineSchema({
     email: v.string(),
     desiredDate: v.string(),
     createdAt: v.number(),
+    cancelledAt: v.optional(v.number()),
     items: v.array(
       v.object({
         itemId: v.id("itemCatalog"),
@@ -52,6 +53,7 @@ export default defineSchema({
     squareOrderId: v.string(),
     desiredDate: v.string(),
     createdAt: v.number(),
+    cancelledAt: v.optional(v.number()),
     fulfillmentType: v.optional(v.string()),
     customer: v.object({
       name: v.optional(v.string()),

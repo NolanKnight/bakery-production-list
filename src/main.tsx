@@ -60,22 +60,22 @@ const authenticatedRoutes: {
   {
     path: "/wholesale-orders",
     element: <WholesaleOrdersPage />,
-    allowedRoles: ["admin"] as const,
+    allowedRoles: ["admin", "employee"] as const,
   },
   {
     path: "/wholesale-order/:id",
     element: <WholesaleOrderPage />,
-    allowedRoles: ["admin", "client"] as const,
+    allowedRoles: ["admin", "client", "employee"] as const,
   },
   {
     path: "/retail-orders",
     element: <RetailOrdersPage />,
-    allowedRoles: ["admin"] as const,
+    allowedRoles: ["admin", "employee"] as const,
   },
   {
     path: "/retail-order/:id",
     element: <RetailOrderPage />,
-    allowedRoles: ["admin"] as const,
+    allowedRoles: ["admin", "employee"] as const,
   },
   {
     path: "/production",

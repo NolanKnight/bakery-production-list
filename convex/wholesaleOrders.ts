@@ -9,6 +9,7 @@ const wholesaleOrderValidator = v.object({
   email: v.string(),
   desiredDate: v.string(),
   createdAt: v.number(),
+  cancelledAt: v.optional(v.number()),
   items: v.array(
     v.object({
       itemId: v.id("itemCatalog"),
@@ -59,10 +60,11 @@ export const getWholesaleOrdersForDate = query({
   returns: v.array(wholesaleOrderValidator),
   handler: async (ctx, args) => {
     await requireRole(ctx, ["admin", "employee"]);
-    return await ctx.db
+    const orders = await ctx.db
       .query("wholesaleOrders")
       .withIndex("by_date", (q) => q.eq("desiredDate", args.date))
       .collect();
+    return orders.filter((order) => order.cancelledAt === undefined);
   },
 });
 
@@ -100,5 +102,31 @@ export const getWholesaleOrder = query({
     }
 
     return order;
+  },
+});
+
+export const cancelWholesaleOrder = mutation({
+  args: {
+    orderId: v.id("wholesaleOrders"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const { user, role } = await requireRole(ctx, ["admin", "client"]);
+    const order = await ctx.db.get(args.orderId);
+    if (!order) {
+      throw new ConvexError({ message: "Order not found." });
+    }
+    if (
+      role === "client" &&
+      order.email.trim().toLowerCase() !== user.email.trim().toLowerCase()
+    ) {
+      throw new ConvexError({ message: "Unauthorized" });
+    }
+    if (order.cancelledAt !== undefined) {
+      throw new ConvexError({ message: "Order has already been cancelled." });
+    }
+
+    await ctx.db.patch(order._id, { cancelledAt: Date.now() });
+    return null;
   },
 });
